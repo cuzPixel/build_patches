@@ -1,0 +1,22 @@
+From 912dc0107803c5741a5ba44cf412901751a51998 Mon Sep 17 00:00:00 2001
+From: raysenlau <raysen@live.cn>
+Date: Wed, 5 Aug 2020 14:12:03 +0800
+Subject: [PATCH] vendor: Enable ota for unofficial
+
+Change-Id: Iba125c1d9545420119de0a4c592fdeced30c0790
+---
+ config/ota.mk | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/config/ota.mk b/config/ota.mk
+index 879ca945..d4d36f3c 100644
+--- a/config/ota.mk
++++ b/config/ota.mk
+@@ -1,4 +1,2 @@
+-ifneq ($(filter OFFICIAL CI,$(CUSTOM_BUILD_TYPE)),)
+ PRODUCT_PACKAGES += \
+     Updates
+-endif
+-- 
+2.27.0
+
