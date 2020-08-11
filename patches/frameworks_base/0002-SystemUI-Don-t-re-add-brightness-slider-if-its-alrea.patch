@@ -1,0 +1,29 @@
+From a9ba0561b37ffd5d1fb7568bc416d7d4bf2ea9c7 Mon Sep 17 00:00:00 2001
+From: raysenlau <raysen@live.cn>
+Date: Tue, 11 Aug 2020 13:02:42 +0800
+Subject: [PATCH 2/2] SystemUI: Don't re add brightness slider if its already
+ present
+
+Change-Id: Id6d66349d0341ec44d6d527b3e8f44c660cc42a8
+---
+ .../src/com/android/systemui/qs/QuickStatusBarHeader.java     | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/packages/SystemUI/src/com/android/systemui/qs/QuickStatusBarHeader.java b/packages/SystemUI/src/com/android/systemui/qs/QuickStatusBarHeader.java
+index 9fadda699..d25bf0bef 100644
+--- a/packages/SystemUI/src/com/android/systemui/qs/QuickStatusBarHeader.java
++++ b/packages/SystemUI/src/com/android/systemui/qs/QuickStatusBarHeader.java
+@@ -346,7 +346,9 @@ public class QuickStatusBarHeader extends RelativeLayout implements
+             } else {
+                 mQuickQsBrightness.findViewById(R.id.brightness_icon).setVisibility(View.GONE);
+             }
+-            mQuickQsBrightness.setVisibility(View.VISIBLE);
++            if (mQuickQsBrightness.getVisibility() == View.GONE) {
++                mQuickQsBrightness.setVisibility(View.VISIBLE);
++            }
+         } else {
+             mQuickQsBrightness.setVisibility(View.GONE);
+         }
+-- 
+2.27.0
+
