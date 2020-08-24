@@ -1,0 +1,61 @@
+From c5a3888767f343e4401782075629bb0797d0a06a Mon Sep 17 00:00:00 2001
+From: raysenlau <raysen@live.cn>
+Date: Fri, 31 Jul 2020 13:06:24 +0800
+Subject: [PATCH 1/2] Update API urls
+
+---
+ src/org/pixelexperience/ota/misc/Constants.java |  8 ++++----
+ src/org/pixelexperience/ota/misc/Utils.java     | 11 +++++------
+ 2 files changed, 9 insertions(+), 10 deletions(-)
+
+diff --git a/src/org/pixelexperience/ota/misc/Constants.java b/src/org/pixelexperience/ota/misc/Constants.java
+index 8608fcd9..88c9ba7f 100644
+--- a/src/org/pixelexperience/ota/misc/Constants.java
++++ b/src/org/pixelexperience/ota/misc/Constants.java
+@@ -33,9 +33,9 @@ public final class Constants {
+     static final String PROP_AB_DEVICE = "ro.build.ab_update";
+     static final String PROP_DEVICE = "org.pixelexperience.device";
+     static final String PROP_BUILD_VERSION = "org.pixelexperience.version";
+-    static final String OTA_URL = "https://download.pixelexperience.org/ota_v4/%s/%s";
+-    static final String OTA_CI_URL = "https://download.pixelexperience.org/ota_ci/%s/%s";
+-    static final String MAINTAINER_URL = "https://download.pixelexperience.org/team/%s";
+-    static final String DOWNLOAD_WEBPAGE_URL = "https://download.pixelexperience.org/changelog/%s/%s";
++    static final String OTA_URL = "https://raw.githubusercontent.com/cuzPixel/android_Updates/10.0/%s/%s.json";
++    static final String OTA_CI_URL = "https://raw.githubusercontent.com/cuzPixel/android_Updates/10.0/%s/%s.json";
++    static final String MAINTAINER_URL = "https://github.com/%s";
++    static final String DOWNLOAD_WEBPAGE_URL = "https://raw.githubusercontent.com/cuzPixel/android_Updates/10.0/%s/%s_changelogs.txt";
+     static final String EXPORT_PATH = "PixelExperience-Updates/";
+ }
+diff --git a/src/org/pixelexperience/ota/misc/Utils.java b/src/org/pixelexperience/ota/misc/Utils.java
+index 8acf1d5d..939e7d59 100644
+--- a/src/org/pixelexperience/ota/misc/Utils.java
++++ b/src/org/pixelexperience/ota/misc/Utils.java
+@@ -161,20 +161,19 @@ public class Utils {
+ 
+     public static String getServerURL() {
+         String buildType = getBuildType();
+-        if (buildType.equals("OFFICIAL")){
+-            return String.format(Constants.OTA_URL, SystemProperties.get(Constants.PROP_DEVICE), SystemProperties.get(Constants.PROP_BUILD_VERSION));
+-        }else if (buildType.equals("CI")){
++        if (buildType.equals("CI")){
+             return String.format(Constants.OTA_CI_URL, SystemProperties.get(Constants.PROP_DEVICE), SystemProperties.get(Constants.PROP_BUILD_VERSION));
++        } else {
++            return String.format(Constants.OTA_URL, SystemProperties.get(Constants.PROP_DEVICE), SystemProperties.get(Constants.PROP_BUILD_VERSION));
+         }
+-        return null;
+     }
+ 
+     public static String getMaintainerURL(String username) {
+         return String.format(Constants.MAINTAINER_URL, username);
+     }
+ 
+-    public static String getDownloadWebpageUrl(String fileName) {
+-        return String.format(Constants.DOWNLOAD_WEBPAGE_URL, SystemProperties.get(Constants.PROP_DEVICE), fileName);
++    public static String getDownloadWebpageUrl() {
++        return String.format(Constants.DOWNLOAD_WEBPAGE_URL, SystemProperties.get(Constants.PROP_DEVICE), SystemProperties.get(Constants.PROP_BUILD_VERSION));
+     }
+ 
+     public static void triggerUpdate(Context context) {
+-- 
+2.28.0
+
