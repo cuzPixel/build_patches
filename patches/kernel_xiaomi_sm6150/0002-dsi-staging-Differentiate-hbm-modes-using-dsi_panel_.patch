@@ -1,0 +1,73 @@
+From e9fd16601d51ce777a3d41d5826da63f177341a9 Mon Sep 17 00:00:00 2001
+From: Pig <pig.priv@gmail.com>
+Date: Fri, 9 Oct 2020 05:52:21 +0800
+Subject: [PATCH 2/5] dsi-staging: Differentiate hbm modes using
+ dsi_panel_is_type_oled
+
+Change-Id: I1a429c329447a1a59a08be49da5356916c80a3d7
+---
+ drivers/gpu/drm/msm/dsi-staging/dsi_panel.c | 23 ++++++++++++++-------
+ 1 file changed, 16 insertions(+), 7 deletions(-)
+
+diff --git a/drivers/gpu/drm/msm/dsi-staging/dsi_panel.c b/drivers/gpu/drm/msm/dsi-staging/dsi_panel.c
+index 9dab52409dd0..4dd19e0a6fe2 100644
+--- a/drivers/gpu/drm/msm/dsi-staging/dsi_panel.c
++++ b/drivers/gpu/drm/msm/dsi-staging/dsi_panel.c
+@@ -4644,6 +4644,9 @@ int dsi_panel_init_display_modes(struct dsi_panel *panel)
+ 	if (panel->hbm_mode)
+ 		dsi_panel_apply_hbm_mode(panel);
+ 
++	if (!dsi_panel_is_type_oled(panel))
++		return rc;
++
+ 	if (panel->display_mode != DISPLAY_MODE_DEFAULT)
+ 		dsi_panel_apply_display_mode(panel);
+ 
+@@ -4796,24 +4799,27 @@ int dsi_panel_post_unprepare(struct dsi_panel *panel)
+ 
+ int dsi_panel_apply_hbm_mode(struct dsi_panel *panel)
+ {
+-	static const enum dsi_cmd_set_type type_map[] = {
+-#if (defined CONFIG_MACH_XIAOMI_F4) || (defined CONFIG_MACH_XIAOMI_F10)
++	static const enum dsi_cmd_set_type type_map_oled[] = {
+ 		DSI_CMD_SET_DISP_HBM_FOD_OFF,
+ 		DSI_CMD_SET_DISP_HBM_FOD_ON
+-#else
++	};
++	static const enum dsi_cmd_set_type type_map_lcd[] = {
+ 		DSI_CMD_SET_DISP_LCD_HBM_OFF,
+ 		DSI_CMD_SET_DISP_LCD_HBM_L1_ON,
+ 		DSI_CMD_SET_DISP_LCD_HBM_L2_ON,
+-#endif
+ 	};
+ 
+ 	enum dsi_cmd_set_type type;
+ 	int rc;
+ 
+-	if (panel->hbm_mode >= 0 && panel->hbm_mode < ARRAY_SIZE(type_map))
+-		type = type_map[panel->hbm_mode];
+-  else
++	if (panel->hbm_mode >= 0 && panel->hbm_mode < ARRAY_SIZE(type_map_lcd)) {
++		if (dsi_panel_is_type_oled(panel)) 
++			type = type_map_oled[panel->hbm_mode];
++		else
++			type = type_map_lcd[panel->hbm_mode];
++	} else {
+ 		type = 0;
++	}
+ 
+ 	mutex_lock(&panel->panel_lock);
+ 	rc = dsi_panel_tx_cmd_set(panel, type);
+@@ -4827,6 +4833,9 @@ int dsi_panel_apply_display_mode(struct dsi_panel *panel)
+ 	enum dsi_cmd_set_type type;
+ 	int rc;
+ 
++	if (!dsi_panel_is_type_oled(panel))
++		return rc;
++
+ 	switch (panel->display_mode) {
+ 		case DISPLAY_MODE_SRGB: type = DSI_CMD_SET_DISP_CRC_SRGB; break;
+ 		case DISPLAY_MODE_DCI_P3: type = DSI_CMD_SET_DISP_CRC_DCIP3; break;
+-- 
+2.28.0
+

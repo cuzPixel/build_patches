@@ -1,0 +1,68 @@
+From d82cf67a6f24710c1d4a8ce5d7b7f06b1725dd44 Mon Sep 17 00:00:00 2001
+From: LopyCheng <lopycheng@google.com>
+Date: Thu, 23 May 2019 13:46:43 +0800
+Subject: [PATCH 3/5] xiaomi: add panel type in device tree
+
+QCT added the new parameter(qcom,mdss-dsi-panel-physical-type) for panel
+type. Default panel type is LCD. We change the panel type to OLED.
+
+Bug: 132392874
+Test: read the "panel->panel_type" from dsi_panel.c
+Change-Id: I92fc4d1abe66eab6ca8a9c1e898a26c00da01fd6
+Signed-off-by: Lopy Cheng <lopycheng@google.com>
+---
+ .../boot/dts/xiaomi/davinci/davinci-sdmmagpie-display.dtsi     | 2 ++
+ .../arm64/boot/dts/xiaomi/tucana/tucana-sdmmagpie-display.dtsi | 3 +++
+ 2 files changed, 5 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/xiaomi/davinci/davinci-sdmmagpie-display.dtsi b/arch/arm64/boot/dts/xiaomi/davinci/davinci-sdmmagpie-display.dtsi
+index e9b2f3b5a2d1..4e15031785ac 100644
+--- a/arch/arm64/boot/dts/xiaomi/davinci/davinci-sdmmagpie-display.dtsi
++++ b/arch/arm64/boot/dts/xiaomi/davinci/davinci-sdmmagpie-display.dtsi
+@@ -41,6 +41,7 @@
+ };
+ 
+ &dsi_ss_fhd_ea_f10_cmd {
++    qcom,mdss-dsi-panel-physical-type = "oled";
+     qcom,panel-supply-entries = <&dsi_panel_pwr_supply_labibb_amoled>;
+     qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_dcs";
+     qcom,mdss-dsi-bl-min-level = <2>;
+@@ -103,6 +104,7 @@
+ };
+ 
+ &dsi_ss_fhd_eb_f10_cmd {
++    qcom,mdss-dsi-panel-physical-type = "oled";
+     qcom,panel-supply-entries = <&dsi_panel_pwr_supply_labibb_amoled>;
+     qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_dcs";
+     qcom,mdss-dsi-bl-min-level = <256>;
+diff --git a/arch/arm64/boot/dts/xiaomi/tucana/tucana-sdmmagpie-display.dtsi b/arch/arm64/boot/dts/xiaomi/tucana/tucana-sdmmagpie-display.dtsi
+index f5faeed3b2e5..866b521d5dd8 100644
+--- a/arch/arm64/boot/dts/xiaomi/tucana/tucana-sdmmagpie-display.dtsi
++++ b/arch/arm64/boot/dts/xiaomi/tucana/tucana-sdmmagpie-display.dtsi
+@@ -75,6 +75,7 @@
+ };
+ 
+ &dsi_xiaomi_f4_41_06_0a_fhd_cmd {
++	qcom,mdss-dsi-panel-physical-type = "oled";
+ 	qcom,panel-supply-entries = <&dsi_panel_pwr_supply_labibb_amoled>;
+ 	qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_dcs";
+ 	qcom,mdss-dsi-bl-min-level = <2>;
+@@ -125,6 +126,7 @@
+ };
+ 
+ &dsi_xiaomi_f4_36_02_0b_fhd_cmd {
++	qcom,mdss-dsi-panel-physical-type = "oled";
+ 	qcom,panel-supply-entries = <&dsi_panel_pwr_supply_labibb_amoled>;
+ 	qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_dcs";
+ 	qcom,mdss-dsi-bl-min-level = <2>;
+@@ -175,6 +177,7 @@
+ };
+ 
+ &dsi_xiaomi_f4_42_06_0c_fhd_cmd {
++	qcom,mdss-dsi-panel-physical-type = "oled";
+ 	qcom,panel-supply-entries = <&dsi_panel_pwr_supply_labibb_amoled>;
+ 	qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_dcs";
+ 	qcom,mdss-dsi-bl-min-level = <2>;
+-- 
+2.28.0
+
