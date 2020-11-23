@@ -1,0 +1,103 @@
+From b4269eb7e705236a45b03ecc492faadef1faaa3b Mon Sep 17 00:00:00 2001
+From: raysenlau <raysen@live.cn>
+Date: Mon, 23 Nov 2020 13:52:30 +0800
+Subject: [PATCH] media: Drop LOCAL_COPY_HEADERS usage
+
+LOCAL_COPY_HEADERS is deprecated, so remove all its usages
+to avoid build warnings.
+
+Change-Id: I8c9de08610e8d94da568b46b3e8c221007c850a0
+---
+ libplatformconfig/Android.mk |  4 ----
+ libstagefrighthw/Android.mk  |  8 --------
+ mm-core/Android.mk           | 33 ---------------------------------
+ 3 files changed, 45 deletions(-)
+
+diff --git a/libplatformconfig/Android.mk b/libplatformconfig/Android.mk
+index c346b0e..d4a82d0 100644
+--- a/libplatformconfig/Android.mk
++++ b/libplatformconfig/Android.mk
+@@ -2,8 +2,6 @@ LOCAL_PATH := $(call my-dir)
+ LOCAL_DIR_PATH:= $(call my-dir)
+ include $(CLEAR_VARS)
+ 
+-LOCAL_COPY_HEADERS_TO := libplatformconfig
+-
+ libplatformconfig-def := \
+       -g0 -O3 -fpic \
+       -Wno-deprecated-declarations -Werror \
+@@ -15,8 +13,6 @@ libplatformconfig-def := \
+ 
+ COMMON_CFLAGS := -O3
+ 
+-include $(BUILD_COPY_HEADERS)
+-
+ LOCAL_CFLAGS := $(COMMON_CFLAGS) $(libplatformconfig-def)
+ 
+ LOCAL_SHARED_LIBRARIES += \
+diff --git a/libstagefrighthw/Android.mk b/libstagefrighthw/Android.mk
+index 89f17d7..73261b6 100644
+--- a/libstagefrighthw/Android.mk
++++ b/libstagefrighthw/Android.mk
+@@ -17,14 +17,6 @@
+ LOCAL_PATH := $(call my-dir)
+ include $(CLEAR_VARS)
+ 
+-#===============================================================================
+-#             Deploy the headers that can be exposed
+-#===============================================================================
+-
+-LOCAL_COPY_HEADERS_TO   := mm-core/omxcore
+-LOCAL_COPY_HEADERS      := QComOMXMetadata.h \
+-                           QComOMXPlugin.h
+-
+ LOCAL_SRC_FILES := \
+     QComOMXPlugin.cpp                      \
+ 
+diff --git a/mm-core/Android.mk b/mm-core/Android.mk
+index b0d0637..66c0f9c 100644
+--- a/mm-core/Android.mk
++++ b/mm-core/Android.mk
+@@ -28,39 +28,6 @@ ifeq ($(call is-platform-sdk-version-at-least,27),true) # O-MR1
+ OMXCORE_CFLAGS += -D_ANDROID_O_MR1_DIVX_CHANGES
+ endif
+ 
+-#===============================================================================
+-#             Deploy the headers that can be exposed
+-#===============================================================================
+-
+-LOCAL_COPY_HEADERS_TO   := mm-core/omxcore
+-LOCAL_COPY_HEADERS      := inc/OMX_Audio.h
+-LOCAL_COPY_HEADERS      += inc/OMX_Component.h
+-LOCAL_COPY_HEADERS      += inc/OMX_ContentPipe.h
+-LOCAL_COPY_HEADERS      += inc/OMX_Core.h
+-LOCAL_COPY_HEADERS      += inc/OMX_Image.h
+-LOCAL_COPY_HEADERS      += inc/OMX_Index.h
+-LOCAL_COPY_HEADERS      += inc/OMX_IVCommon.h
+-LOCAL_COPY_HEADERS      += inc/OMX_Other.h
+-LOCAL_COPY_HEADERS      += inc/OMX_QCOMExtns.h
+-LOCAL_COPY_HEADERS      += inc/OMX_Types.h
+-LOCAL_COPY_HEADERS      += inc/OMX_Video.h
+-LOCAL_COPY_HEADERS      += inc/qc_omx_common.h
+-LOCAL_COPY_HEADERS      += inc/qc_omx_component.h
+-LOCAL_COPY_HEADERS      += inc/qc_omx_msg.h
+-LOCAL_COPY_HEADERS      += inc/QOMX_AudioExtensions.h
+-LOCAL_COPY_HEADERS      += inc/QOMX_AudioIndexExtensions.h
+-LOCAL_COPY_HEADERS      += inc/OMX_CoreExt.h
+-LOCAL_COPY_HEADERS      += inc/QOMX_CoreExtensions.h
+-LOCAL_COPY_HEADERS      += inc/QOMX_FileFormatExtensions.h
+-LOCAL_COPY_HEADERS      += inc/QOMX_IVCommonExtensions.h
+-LOCAL_COPY_HEADERS      += inc/QOMX_SourceExtensions.h
+-LOCAL_COPY_HEADERS      += inc/QOMX_VideoExtensions.h
+-LOCAL_COPY_HEADERS      += inc/OMX_IndexExt.h
+-LOCAL_COPY_HEADERS      += inc/OMX_VideoExt.h
+-LOCAL_COPY_HEADERS      += inc/QOMX_StreamingExtensions.h
+-LOCAL_COPY_HEADERS      += inc/QCMediaDefs.h
+-LOCAL_COPY_HEADERS      += inc/QCMetaData.h
+-
+ #===============================================================================
+ #             LIBRARY for Android apps
+ #===============================================================================
+-- 
+2.28.0
+
