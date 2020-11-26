@@ -1,0 +1,33 @@
+From 3811210981ef773b6f2df6c8fd70381fa1e3422f Mon Sep 17 00:00:00 2001
+From: Susheel Nyamala <snyamala@codeaurora.org>
+Date: Tue, 23 Apr 2019 15:10:05 +0530
+Subject: [PATCH 5/9] Fix to block sim selection popup for data
+
+Grant protected access for member variables required
+to override methods for blocking sim selection popup
+display
+
+Change-Id: I3c70687c59ada9e0dc51e55a6b34356dee3f4e54
+CRs-Fixed: 2442591
+---
+ .../android/internal/telephony/MultiSimSettingController.java  | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/src/java/com/android/internal/telephony/MultiSimSettingController.java b/src/java/com/android/internal/telephony/MultiSimSettingController.java
+index a90daf990..b1955ce48 100644
+--- a/src/java/com/android/internal/telephony/MultiSimSettingController.java
++++ b/src/java/com/android/internal/telephony/MultiSimSettingController.java
+@@ -111,8 +111,9 @@ public class MultiSimSettingController extends Handler {
+ 
+     protected final Context mContext;
+     protected final SubscriptionController mSubController;
++    protected boolean mIsAllSubscriptionsLoaded;
+     // Keep a record of active primary (non-opportunistic) subscription list.
+-    @NonNull private List<Integer> mPrimarySubList = new ArrayList<>();
++    @NonNull protected List<Integer> mPrimarySubList = new ArrayList<>();
+ 
+     /** The singleton instance. */
+     protected static MultiSimSettingController sInstance = null;
+-- 
+2.28.0
+

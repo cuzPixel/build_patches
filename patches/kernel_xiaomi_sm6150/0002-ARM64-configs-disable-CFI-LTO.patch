@@ -1,0 +1,36 @@
+From 8ccde7606b0bcf536ec7f3ae85ac4f849e01d1a4 Mon Sep 17 00:00:00 2001
+From: raysenlau <raysen@live.cn>
+Date: Wed, 25 Nov 2020 15:21:28 +0800
+Subject: [PATCH 2/3] ARM64: configs: disable CFI, LTO
+
+---
+ arch/arm64/configs/vendor/lineage_davinci_defconfig | 11 +++--------
+ 1 file changed, 3 insertions(+), 8 deletions(-)
+
+diff --git a/arch/arm64/configs/vendor/lineage_davinci_defconfig b/arch/arm64/configs/vendor/lineage_davinci_defconfig
+index 3892f509d120..3445300e1f1f 100644
+--- a/arch/arm64/configs/vendor/lineage_davinci_defconfig
++++ b/arch/arm64/configs/vendor/lineage_davinci_defconfig
+@@ -279,16 +279,11 @@ CONFIG_CC_STACKPROTECTOR=y
+ # CONFIG_CC_STACKPROTECTOR_REGULAR is not set
+ CONFIG_CC_STACKPROTECTOR_STRONG=y
+ CONFIG_THIN_ARCHIVES=y
+-CONFIG_LTO=y
++# CONFIG_LTO is not set
+ CONFIG_ARCH_SUPPORTS_LTO_CLANG=y
+ CONFIG_ARCH_SUPPORTS_THINLTO=y
+-# CONFIG_THINLTO is not set
+-# CONFIG_LTO_NONE is not set
+-CONFIG_LTO_CLANG=y
+-CONFIG_CFI=y
+-# CONFIG_CFI_PERMISSIVE is not set
+-CONFIG_CFI_CLANG=y
+-CONFIG_CFI_CLANG_SHADOW=y
++CONFIG_LTO_NONE=y
++# CONFIG_LTO_CLANG is not set
+ CONFIG_ARCH_SUPPORTS_SHADOW_CALL_STACK=y
+ # CONFIG_ROP_PROTECTION_NONE is not set
+ CONFIG_SHADOW_CALL_STACK=y
+-- 
+2.28.0
+

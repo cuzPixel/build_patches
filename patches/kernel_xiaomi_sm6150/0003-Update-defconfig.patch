@@ -1,27 +1,25 @@
-From 32b4d549177abb473aed1d6a101c39441556fb48 Mon Sep 17 00:00:00 2001
+From a79cb98c51eb318a49c377f16d46f8a302e351a4 Mon Sep 17 00:00:00 2001
 From: raysenlau <raysen@live.cn>
 Date: Sat, 20 Jun 2020 09:58:45 +0800
-Subject: [PATCH 2/2] Update defconfig
+Subject: [PATCH 3/3] Update defconfig
 
 ---
- arch/arm64/configs/vendor/lineage_davinci_defconfig | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ arch/arm64/configs/vendor/lineage_davinci_defconfig | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/arch/arm64/configs/vendor/lineage_davinci_defconfig b/arch/arm64/configs/vendor/lineage_davinci_defconfig
-index 5bbdd955097f5..21f8646df6b3e 100644
+index 3445300e1f1f..6aa9aaf9e95f 100644
 --- a/arch/arm64/configs/vendor/lineage_davinci_defconfig
 +++ b/arch/arm64/configs/vendor/lineage_davinci_defconfig
-@@ -47,8 +47,8 @@ CONFIG_THREAD_INFO_IN_TASK=y
+@@ -48,7 +48,7 @@ CONFIG_THREAD_INFO_IN_TASK=y
  CONFIG_INIT_ENV_ARG_LIMIT=32
  CONFIG_CROSS_COMPILE=""
  # CONFIG_COMPILE_TEST is not set
 -CONFIG_LOCALVERSION="-LineageOS"
--CONFIG_LOCALVERSION_AUTO=y
 +CONFIG_LOCALVERSION="-perf"
-+# CONFIG_LOCALVERSION_AUTO is not set
+ CONFIG_LOCALVERSION_AUTO=y
  CONFIG_DEFAULT_HOSTNAME="(none)"
  CONFIG_SWAP=y
- # CONFIG_SYSVIPC is not set
 -- 
-2.27.0
+2.28.0
 

@@ -1,0 +1,44 @@
+From 37fc4a9c1cb5cd0b6ef1668a420abbe0aab9703b Mon Sep 17 00:00:00 2001
+From: raysenlau <raysen@live.cn>
+Date: Thu, 26 Nov 2020 10:10:22 +0800
+Subject: [PATCH 3/3] kernel: Make system/vendor images depend on modules
+
+* We're having a race with the kernel module build and vendor.img
+  generation, and sometimes when vendor.img wins it won't include
+  any modules in the image, which leads to all sorts of breakage
+
+Change-Id: I2cdde96530aa8e47351cace76352788cde631058
+---
+ build/tasks/kernel.mk | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/build/tasks/kernel.mk b/build/tasks/kernel.mk
+index d606612..9e78d65 100644
+--- a/build/tasks/kernel.mk
++++ b/build/tasks/kernel.mk
+@@ -168,6 +168,7 @@ else ifeq ($(NEED_KERNEL_MODULE_SYSTEM),true)
+ KERNEL_MODULES_OUT := $(TARGET_OUT)
+ KERNEL_DEPMOD_STAGING_DIR := $(KERNEL_BUILD_OUT_PREFIX)$(call intermediates-dir-for,PACKAGING,depmod_system)
+ KERNEL_MODULE_MOUNTPOINT := system
++$(INSTALLED_SYSTEMIMAGE_TARGET): $(TARGET_PREBUILT_INT_KERNEL)
+ else ifeq ($(NEED_KERNEL_MODULE_VENDOR_OVERLAY),true)
+ KERNEL_MODULES_OUT := $(TARGET_OUT_PRODUCT)/vendor_overlay/$(PRODUCT_TARGET_VNDK_VERSION)
+ KERNEL_DEPMOD_STAGING_DIR := $(KERNEL_BUILD_OUT_PREFIX)$(call intermediates-dir-for,PACKAGING,depmod_product)
+@@ -177,6 +178,7 @@ else
+ KERNEL_MODULES_OUT := $(TARGET_OUT_VENDOR)
+ KERNEL_DEPMOD_STAGING_DIR := $(KERNEL_BUILD_OUT_PREFIX)$(call intermediates-dir-for,PACKAGING,depmod_vendor)
+ KERNEL_MODULE_MOUNTPOINT := vendor
++$(INSTALLED_VENDORIMAGE_TARGET): $(TARGET_PREBUILT_INT_KERNEL)
+ endif
+ MODULES_INTERMEDIATES := $(KERNEL_BUILD_OUT_PREFIX)$(call intermediates-dir-for,PACKAGING,kernel_modules)
+ 
+@@ -376,4 +378,4 @@ dtboimage: $(INSTALLED_DTBOIMAGE_TARGET)
+ .PHONY: dtbimage
+ dtbimage: $(INSTALLED_DTBIMAGE_TARGET)
+ 
+-endif # TARGET_NO_KERNEL
+\ No newline at end of file
++endif # TARGET_NO_KERNEL
+-- 
+2.28.0
+
