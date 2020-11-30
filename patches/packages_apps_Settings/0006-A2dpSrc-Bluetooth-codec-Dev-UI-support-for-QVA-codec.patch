@@ -1,0 +1,100 @@
+From 5dda88ec3b49477a4819dae2485c09437343bb30 Mon Sep 17 00:00:00 2001
+From: Satheesh Kumar Pallemoni <spallemo@codeaurora.org>
+Date: Mon, 13 Apr 2020 20:18:09 +0530
+Subject: [PATCH 06/11] A2dpSrc: Bluetooth codec Dev-UI support for QVA codecs
+
+Added Bluetooth codec Dev-UI support for QVA codecs.
+
+CRs-Fixed: 2663248
+Change-Id: I035d760bbf4de27f2216c4ffb42df26a0c0ce476
+---
+ .../DevelopmentSettingsDashboardFragment.java     |  1 +
+ .../BluetoothCodecDialogPreferenceController.java | 15 +++++++++++++++
+ .../BluetoothHDAudioPreferenceController.java     |  1 +
+ ...luetoothQualityDialogPreferenceController.java |  3 ++-
+ 4 files changed, 19 insertions(+), 1 deletion(-)
+
+diff --git a/src/com/android/settings/development/DevelopmentSettingsDashboardFragment.java b/src/com/android/settings/development/DevelopmentSettingsDashboardFragment.java
+index f2d60f1981..4a83df6551 100644
+--- a/src/com/android/settings/development/DevelopmentSettingsDashboardFragment.java
++++ b/src/com/android/settings/development/DevelopmentSettingsDashboardFragment.java
+@@ -562,6 +562,7 @@ public class DevelopmentSettingsDashboardFragment extends RestrictedDashboardFra
+ 
+     @Override
+     public void onBluetoothHDAudioEnabled(boolean enabled) {
++        Log.d(TAG, "onBluetoothHDAudioEnabled: " + enabled);
+         for (AbstractPreferenceController controller : mPreferenceControllers) {
+             if (controller instanceof AbstractBluetoothDialogPreferenceController) {
+                 ((AbstractBluetoothDialogPreferenceController) controller).onHDAudioEnabled(
+diff --git a/src/com/android/settings/development/bluetooth/BluetoothCodecDialogPreferenceController.java b/src/com/android/settings/development/bluetooth/BluetoothCodecDialogPreferenceController.java
+index a0af268c8f..dc326fe9fd 100644
+--- a/src/com/android/settings/development/bluetooth/BluetoothCodecDialogPreferenceController.java
++++ b/src/com/android/settings/development/bluetooth/BluetoothCodecDialogPreferenceController.java
+@@ -62,6 +62,7 @@ public class BluetoothCodecDialogPreferenceController extends
+ 
+     @Override
+     public void onHDAudioEnabled(boolean enabled) {
++        Log.d(TAG, " onHDAudioEnabled: " + enabled);
+         if (!enabled) {
+             // If option codec is disabled, SBC is the only only one available codec.
+             onIndexUpdated(convertCfgToBtnIndex(BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC));
+@@ -125,6 +126,14 @@ public class BluetoothCodecDialogPreferenceController extends
+                 codecTypeValue = BluetoothCodecConfig.SOURCE_CODEC_TYPE_LDAC;
+                 codecPriorityValue = BluetoothCodecConfig.CODEC_PRIORITY_HIGHEST;
+                 break;
++            case 6:
++                codecTypeValue = BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX_ADAPTIVE;
++                codecPriorityValue = BluetoothCodecConfig.CODEC_PRIORITY_HIGHEST;
++                break;
++            case 7:
++                codecTypeValue = BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX_TWSP;
++                codecPriorityValue = BluetoothCodecConfig.CODEC_PRIORITY_HIGHEST;
++                break;
+             default:
+                 break;
+         }
+@@ -179,9 +188,15 @@ public class BluetoothCodecDialogPreferenceController extends
+             case BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX_HD:
+                 index = 4;
+                 break;
++            case BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX_ADAPTIVE:
++                index = 6;
++                break;
+             case BluetoothCodecConfig.SOURCE_CODEC_TYPE_LDAC:
+                 index = 5;
+                 break;
++            case BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX_TWSP:
++                index = 7;
++                break;
+             default:
+                 Log.e(TAG, "Unsupported config:" + config);
+                 break;
+diff --git a/src/com/android/settings/development/bluetooth/BluetoothHDAudioPreferenceController.java b/src/com/android/settings/development/bluetooth/BluetoothHDAudioPreferenceController.java
+index d4ca4e5795..6481c759f7 100644
+--- a/src/com/android/settings/development/bluetooth/BluetoothHDAudioPreferenceController.java
++++ b/src/com/android/settings/development/bluetooth/BluetoothHDAudioPreferenceController.java
+@@ -81,6 +81,7 @@ public class BluetoothHDAudioPreferenceController extends AbstractBluetoothPrefe
+             return true;
+         }
+         final boolean enabled = (Boolean) newValue;
++        Log.e(TAG, "onPreferenceChange: " + enabled);
+         final int prefValue = enabled
+                 ? BluetoothA2dp.OPTIONAL_CODECS_PREF_ENABLED
+                 : BluetoothA2dp.OPTIONAL_CODECS_PREF_DISABLED;
+diff --git a/src/com/android/settings/development/bluetooth/BluetoothQualityDialogPreferenceController.java b/src/com/android/settings/development/bluetooth/BluetoothQualityDialogPreferenceController.java
+index 4b38e11977..f4d685733b 100644
+--- a/src/com/android/settings/development/bluetooth/BluetoothQualityDialogPreferenceController.java
++++ b/src/com/android/settings/development/bluetooth/BluetoothQualityDialogPreferenceController.java
+@@ -105,7 +105,8 @@ public class BluetoothQualityDialogPreferenceController extends
+ 
+     @Override
+     public void onHDAudioEnabled(boolean enabled) {
+-        mPreference.setEnabled(false);
++        Log.d(TAG, "onHDAudioEnabled: " + enabled);
++        mPreference.setEnabled(enabled);
+     }
+ 
+     @VisibleForTesting
+-- 
+2.28.0
+

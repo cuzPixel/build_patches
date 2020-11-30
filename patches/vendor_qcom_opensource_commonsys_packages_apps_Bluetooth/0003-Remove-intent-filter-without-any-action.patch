@@ -1,0 +1,31 @@
+From c06f9feb5c8c286180d2305fb1daae38a527a4af Mon Sep 17 00:00:00 2001
+From: Bruno Martins <bgcngm@gmail.com>
+Date: Fri, 10 Jan 2020 22:17:08 +0000
+Subject: [PATCH 3/9] Remove intent filter without any action
+
+Test: Build and observe that the following warning no longer appears in logs:
+
+  W PackageParser: No actions in intent filter at /system/app/Bluetooth/Bluetooth.apk Binary XML file line #263
+
+Change-Id: I0074a6a18433e7c2f18ad8011084011372abcdfd
+---
+ AndroidManifest.xml | 3 ---
+ 1 file changed, 3 deletions(-)
+
+diff --git a/AndroidManifest.xml b/AndroidManifest.xml
+index 84342b2..f0ad616 100644
+--- a/AndroidManifest.xml
++++ b/AndroidManifest.xml
+@@ -237,9 +237,6 @@
+             android:excludeFromRecents="true"
+             android:theme="@android:style/Theme.Material.Light.Dialog.Alert"
+             android:enabled="@bool/profile_supported_pbap">
+-            <intent-filter>
+-                <category android:name="android.intent.category.DEFAULT" />
+-            </intent-filter>
+         </activity>
+         <service
+             android:process="@string/process"
+-- 
+2.28.0
+

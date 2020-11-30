@@ -1,0 +1,44 @@
+From b4b58094562e01e05ac12ed0306c650c4638f5d7 Mon Sep 17 00:00:00 2001
+From: raysenlau <raysen@live.cn>
+Date: Mon, 30 Nov 2020 09:12:49 +0800
+Subject: [PATCH] config: Setup soong namespaces for TARGET_USE_QTI_BT_STACK
+
+To opt-in for QTI BT addons, enable TARGET_USE_QTI_BT_STACK in BoardConfig.mk
+
+Reference: [https://github.com/LineageOS/android_vendor_qcom_opensource_bluetooth-commonsys-intf/blob/lineage-18.0/bt-system-opensource-product.mk]
+
+Change-Id: I6bf3e1dda6fe5dc66f6fafdb32a1daecb9616c84
+---
+ config/BoardConfigQcom.mk  | 6 ++++++
+ config/BoardConfigSoong.mk | 4 ++++
+ 2 files changed, 10 insertions(+)
+
+diff --git a/config/BoardConfigQcom.mk b/config/BoardConfigQcom.mk
+index 5233d20..aae022c 100644
+--- a/config/BoardConfigQcom.mk
++++ b/config/BoardConfigQcom.mk
+@@ -111,3 +111,9 @@ endif
+ ifneq ($(PRODUCT_PLATFORM_SOD),true)
+     PRODUCT_SOONG_NAMESPACES += vendor/qcom/opensource/dataservices
+ endif
++
++ifeq ($(TARGET_USE_QTI_BT_STACK),true)
++PRODUCT_SOONG_NAMESPACES += \
++    vendor/qcom/opensource/commonsys/packages/apps/Bluetooth \
++    vendor/qcom/opensource/commonsys/system/bt/conf
++endif #TARGET_USE_QTI_BT_STACK
+diff --git a/config/BoardConfigSoong.mk b/config/BoardConfigSoong.mk
+index ecfd5dd..c7aba7d 100644
+--- a/config/BoardConfigSoong.mk
++++ b/config/BoardConfigSoong.mk
+@@ -96,3 +96,7 @@ endif
+ ifneq ($(filter $(UM_PLATFORMS),$(TARGET_BOARD_PLATFORM)),)
+ SOONG_CONFIG_customQcomVars_qcom_soong_namespace := $(QCOM_SOONG_NAMESPACE)
+ endif
++
++ifneq ($(TARGET_USE_QTI_BT_STACK),true)
++PRODUCT_SOONG_NAMESPACES += packages/apps/Bluetooth
++endif #TARGET_USE_QTI_BT_STACK
+-- 
+2.28.0
+

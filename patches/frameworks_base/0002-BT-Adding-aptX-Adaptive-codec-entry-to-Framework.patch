@@ -1,0 +1,122 @@
+From 44f70439fe9ebd5b5800b4d08c9d23ec6180abbb Mon Sep 17 00:00:00 2001
+From: Gurpreet Ghai <gghai@codeaurora.org>
+Date: Fri, 6 Jul 2018 11:20:44 +0530
+Subject: [PATCH 02/37] BT: Adding aptX-Adaptive codec entry to Framework
+
+Adding entry for aptX Adaptive into Framework for
+indexing and UI handling.
+
+ Conflicts:
+	core/java/android/bluetooth/BluetoothCodecConfig.java
+	packages/SettingsLib/res/values-en-rGB/arrays.xml
+	packages/SettingsLib/res/values/arrays.xml
+
+CRs-Fixed: 2280216
+
+Change-Id: I94627eb3188b6c69d48f982d4e6c41f78e5e81fa
+Signed-off-by: Volodymyr Zhdanov <wight554@gmail.com>
+---
+ core/java/android/bluetooth/BluetoothCodecConfig.java     | 8 ++++++--
+ packages/SettingsLib/res/values-en-rGB/arrays.xml         | 2 ++
+ packages/SettingsLib/res/values/arrays.xml                | 2 ++
+ .../com/android/settingslib/bluetooth/A2dpProfile.java    | 3 +++
+ .../android/settingslib/bluetooth/A2dpProfileTest.java    | 2 +-
+ 5 files changed, 14 insertions(+), 3 deletions(-)
+
+diff --git a/core/java/android/bluetooth/BluetoothCodecConfig.java b/core/java/android/bluetooth/BluetoothCodecConfig.java
+index d2a15357aa1..4ed1213a392 100644
+--- a/core/java/android/bluetooth/BluetoothCodecConfig.java
++++ b/core/java/android/bluetooth/BluetoothCodecConfig.java
+@@ -59,9 +59,11 @@ public final class BluetoothCodecConfig implements Parcelable {
+ 
+     public static final int SOURCE_CODEC_TYPE_APTX_HD = 3;
+ 
+-    public static final int SOURCE_CODEC_TYPE_LDAC = 4;
++    public static final int SOURCE_CODEC_TYPE_APTX_ADAPTIVE = 4;
+ 
+-    public static final int SOURCE_CODEC_TYPE_MAX = 5;
++    public static final int SOURCE_CODEC_TYPE_LDAC = 5;
++
++    public static final int SOURCE_CODEC_TYPE_MAX = 6;
+ 
+ 
+     public static final int SOURCE_CODEC_TYPE_INVALID = 1000 * 1000;
+@@ -377,6 +379,8 @@ public final class BluetoothCodecConfig implements Parcelable {
+                 return "aptX HD";
+             case SOURCE_CODEC_TYPE_LDAC:
+                 return "LDAC";
++            case SOURCE_CODEC_TYPE_APTX_ADAPTIVE:
++                return "aptX Adaptive";
+             case SOURCE_CODEC_TYPE_INVALID:
+                 return "INVALID CODEC";
+             default:
+diff --git a/packages/SettingsLib/res/values-en-rGB/arrays.xml b/packages/SettingsLib/res/values-en-rGB/arrays.xml
+index 97e598e7600..0ae2160a15f 100644
+--- a/packages/SettingsLib/res/values-en-rGB/arrays.xml
++++ b/packages/SettingsLib/res/values-en-rGB/arrays.xml
+@@ -92,6 +92,7 @@
+     <item msgid="1049450003868150455">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g> audio"</item>
+     <item msgid="2908219194098827570">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX_HD">aptX™ HD</xliff:g> audio"</item>
+     <item msgid="3825367753087348007">"LDAC"</item>
++    <item msgid="8711430979086781450">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX_ADAPTIVE">aptX™ Adaptive</xliff:g> audio"</item>
+   </string-array>
+   <string-array name="bluetooth_a2dp_codec_summaries">
+     <item msgid="8868109554557331312">"Use system selection (default)"</item>
+@@ -100,6 +101,7 @@
+     <item msgid="8627333814413492563">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g> audio"</item>
+     <item msgid="3517061573669307965">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX_HD">aptX™ HD</xliff:g> audio"</item>
+     <item msgid="2553206901068987657">"LDAC"</item>
++    <item msgid="102988075927343894">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX_ADAPTIVE">aptX™ Adaptive</xliff:g> audio"</item>
+   </string-array>
+   <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
+     <item msgid="926809261293414607">"Use system selection (default)"</item>
+diff --git a/packages/SettingsLib/res/values/arrays.xml b/packages/SettingsLib/res/values/arrays.xml
+index d59d698efba..5ff2d7ed28b 100644
+--- a/packages/SettingsLib/res/values/arrays.xml
++++ b/packages/SettingsLib/res/values/arrays.xml
+@@ -154,6 +154,7 @@
+         <item><xliff:g id="qualcomm">Qualcomm®</xliff:g> <xliff:g id="aptx">aptX™</xliff:g> audio</item>
+         <item><xliff:g id="qualcomm">Qualcomm®</xliff:g> <xliff:g id="aptx_hd">aptX™ HD</xliff:g> audio</item>
+         <item>LDAC</item>
++        <item><xliff:g id="qualcomm">Qualcomm®</xliff:g> <xliff:g id="aptx_adaptive">aptX™ Adaptive</xliff:g> audio</item>
+     </string-array>
+ 
+     <!-- Values for Bluetooth Audio Codec selection preference. -->
+@@ -174,6 +175,7 @@
+         <item><xliff:g id="qualcomm">Qualcomm®</xliff:g> <xliff:g id="aptx">aptX™</xliff:g> audio</item>
+         <item><xliff:g id="qualcomm">Qualcomm®</xliff:g> <xliff:g id="aptx_hd">aptX™ HD</xliff:g> audio</item>
+         <item>LDAC</item>
++        <item><xliff:g id="qualcomm">Qualcomm®</xliff:g> <xliff:g id="aptx_adaptive">aptX™ Adaptive</xliff:g> audio</item>
+     </string-array>
+ 
+     <!-- Titles for Bluetooth Audio Codec Sample Rate selection preference. [CHAR LIMIT=50] -->
+diff --git a/packages/SettingsLib/src/com/android/settingslib/bluetooth/A2dpProfile.java b/packages/SettingsLib/src/com/android/settingslib/bluetooth/A2dpProfile.java
+index 3c785604886..67ca523e51d 100644
+--- a/packages/SettingsLib/src/com/android/settingslib/bluetooth/A2dpProfile.java
++++ b/packages/SettingsLib/src/com/android/settingslib/bluetooth/A2dpProfile.java
+@@ -312,6 +312,9 @@ public class A2dpProfile implements LocalBluetoothProfile {
+            case BluetoothCodecConfig.SOURCE_CODEC_TYPE_LDAC:
+                index = 5;
+                break;
++           case BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX_ADAPTIVE:
++               index = 6;
++               break;
+            }
+ 
+         if (index < 0) {
+diff --git a/packages/SettingsLib/tests/robotests/src/com/android/settingslib/bluetooth/A2dpProfileTest.java b/packages/SettingsLib/tests/robotests/src/com/android/settingslib/bluetooth/A2dpProfileTest.java
+index 9afdd43ce73..ef4fe7b38cb 100644
+--- a/packages/SettingsLib/tests/robotests/src/com/android/settingslib/bluetooth/A2dpProfileTest.java
++++ b/packages/SettingsLib/tests/robotests/src/com/android/settingslib/bluetooth/A2dpProfileTest.java
+@@ -130,7 +130,7 @@ public class A2dpProfileTest {
+     private static String KNOWN_CODEC_LABEL = "Use high quality audio: %1$s";
+     private static String UNKNOWN_CODEC_LABEL = "Use high quality audio";
+     private static String[] CODEC_NAMES =
+-            new String[]{"Default", "SBC", "AAC", "aptX", "aptX HD", "LDAC"};
++            new String[]{"Default", "SBC", "AAC", "aptX", "aptX HD", "LDAC", "aptX Adaptive"};
+ 
+     /**
+      * Helper for setting up several tests of getHighQualityAudioOptionLabel
+-- 
+2.28.0
+

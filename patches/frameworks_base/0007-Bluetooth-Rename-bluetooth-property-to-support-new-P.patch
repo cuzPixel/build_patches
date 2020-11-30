@@ -1,0 +1,36 @@
+From 9dd1cf9664685006a22ba68d1f8fdc99b7606fc5 Mon Sep 17 00:00:00 2001
+From: Safoorah Banu Shaik <safoorah@codeaurora.org>
+Date: Thu, 5 Jul 2018 18:56:42 +0530
+Subject: [PATCH 07/37] Bluetooth: Rename bluetooth property to support new P
+ Treble rules
+
+- Renamed the property persist.vendor.bt.connect.peer_earbud to
+  persist.vendor.btstack.connect.peer_earbud to support new P
+  Treble rules.
+
+ Conflicts:
+	packages/SettingsLib/src/com/android/settingslib/bluetooth/CachedBluetoothDevice.java
+
+CRs-Fixed: 2277397
+Change-Id: I45dc740a45195154e2fe2a88a0384181fd0c7907
+Signed-off-by: Volodymyr Zhdanov <wight554@gmail.com>
+---
+ .../android/settingslib/bluetooth/CachedBluetoothDevice.java    | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/packages/SettingsLib/src/com/android/settingslib/bluetooth/CachedBluetoothDevice.java b/packages/SettingsLib/src/com/android/settingslib/bluetooth/CachedBluetoothDevice.java
+index 3e42a35a3e5..fc54b5e401f 100644
+--- a/packages/SettingsLib/src/com/android/settingslib/bluetooth/CachedBluetoothDevice.java
++++ b/packages/SettingsLib/src/com/android/settingslib/bluetooth/CachedBluetoothDevice.java
+@@ -737,7 +737,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice>
+         refresh();
+ 
+         if (bondState == BluetoothDevice.BOND_BONDED) {
+-            if (SystemProperties.getBoolean("persist.vendor.bt.connect.peer_earbud", true)) {
++            if (SystemProperties.getBoolean("persist.vendor.btstack.connect.peer_earbud", true)) {
+                 Log.d(TAG, "Initiating connection to" + mDevice);
+                 if (mDevice.isBondingInitiatedLocally() || mDevice.isTwsPlusDevice()) {
+                     connect();
+-- 
+2.28.0
+

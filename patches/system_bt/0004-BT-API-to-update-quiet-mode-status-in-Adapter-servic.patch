@@ -1,0 +1,35 @@
+From 836de0412356e588490b7e6213bb1ebe81ae4ad1 Mon Sep 17 00:00:00 2001
+From: M Safoorah Banu <safoorah@codeaurora.org>
+Date: Tue, 16 Oct 2018 10:45:46 +0530
+Subject: [PATCH 04/10] BT: API to update quiet mode status in Adapter service
+ [3/3]
+
+ - In BLE on use case, quiet mode status is not updated to
+   Adapter service which results in not initiating auto
+   connection of hfp & a2dp though quiet mode is disabled
+   for next turn On.
+
+ - Added new API to update quiet mode status in Adapter
+   service.
+
+CRs-Fixed: 2337538
+Change-Id: I6030c3eb4d43867483d7ada36564c7c3567e9a7b
+---
+ binder/android/bluetooth/IBluetooth.aidl | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/binder/android/bluetooth/IBluetooth.aidl b/binder/android/bluetooth/IBluetooth.aidl
+index a98846413..263598e88 100644
+--- a/binder/android/bluetooth/IBluetooth.aidl
++++ b/binder/android/bluetooth/IBluetooth.aidl
+@@ -174,6 +174,7 @@ interface IBluetooth
+     oneway void requestActivityInfo(in ResultReceiver result);
+ 
+     void onLeServiceUp();
++    void updateQuietModeStatus(boolean quietMode);
+     void onBrEdrDown();
+ 
+     boolean connectAllEnabledProfiles(in BluetoothDevice device);
+-- 
+2.28.0
+

@@ -1,0 +1,71 @@
+From 3c820c9722d79d477f831cc732dce840890cab48 Mon Sep 17 00:00:00 2001
+From: Venkata Jagadeesh Garaga <vgaraga@codeaurora.org>
+Date: Thu, 27 Jun 2019 11:24:21 +0530
+Subject: [PATCH 3/5] GAP: Reset bondingInitiatedLocally flag(2/3)
+
+When Pairing initiated from DUT, bondingIinitiatedLocally
+flag sets from adapterservice. If user disable profile
+options from UI and tries to connect from remote,DUT
+rejects the incoming connection, when dut rejects
+connection some remotes may initiates pairing agiagn.
+
+Profile options should be in disable state after incoming
+pairing successful as user disabled profile options, but
+profile options getting enabled as bondingInitiatedLocally
+not reset.
+
+Hence Reset bondingInitiatedLocally flag after connection
+
+ Conflicts:
+	src/com/android/bluetooth/btservice/AdapterService.java
+
+Change-Id: I1c1fd8681f25a9e957b5c91be51b587011701956
+CRs-Fixed: 2457374
+Signed-off-by: Volodymyr Zhdanov <wight554@gmail.com>
+---
+ .../bluetooth/btservice/AdapterService.java   | 22 +++++++++++++++++++
+ 1 file changed, 22 insertions(+)
+
+diff --git a/src/com/android/bluetooth/btservice/AdapterService.java b/src/com/android/bluetooth/btservice/AdapterService.java
+index c0ed6cafa5..a6419739c3 100644
+--- a/src/com/android/bluetooth/btservice/AdapterService.java
++++ b/src/com/android/bluetooth/btservice/AdapterService.java
+@@ -1500,6 +1500,17 @@ public class AdapterService extends Service {
+             return deviceProp != null && deviceProp.isBondingInitiatedLocally();
+         }
+ 
++        @Override
++        public void setBondingInitiatedLocally(BluetoothDevice device, boolean localInitiated) {
++            // don't check caller, may be called from system UI
++            AdapterService service = getService();
++            if (service == null) {
++                return;
++            }
++            service.setBondingInitiatedLocally(device,localInitiated);
++            return;
++        }
++
+         @Override
+         public long getSupportedProfiles() {
+             AdapterService service = getService();
+@@ -2377,6 +2388,17 @@ public class AdapterService extends Service {
+         return deviceProp.getBondState();
+     }
+ 
++    void setBondingInitiatedLocally(BluetoothDevice device, boolean localInitiated) {
++        enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
++        DeviceProperties deviceProp = mRemoteDevices.getDeviceProperties(device);
++        if (deviceProp == null) {
++            return;
++        }
++        Log.w(TAG," localInitiated " + localInitiated);
++        deviceProp.setBondingInitiatedLocally(localInitiated);
++        return;
++    }
++
+     int getConnectionState(BluetoothDevice device) {
+         return getConnectionStateNative(addressToBytes(device.getAddress()));
+     }
+-- 
+2.28.0
+

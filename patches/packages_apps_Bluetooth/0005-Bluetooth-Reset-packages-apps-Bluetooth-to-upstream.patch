@@ -1,0 +1,46 @@
+From c7c87d7fa0bdb165fdac55d100072fb5727d1b97 Mon Sep 17 00:00:00 2001
+From: Steven Laver <lavers@google.com>
+Date: Thu, 26 Dec 2019 13:11:58 -0800
+Subject: [PATCH 5/5] Bluetooth: Reset packages/apps/Bluetooth to upstream
+
+Bug: 140404592
+
+CRs-Fixed: 2582532
+Change-Id: Ib63616dc6d06a0df12da4a091ea3cb831b89fbed
+---
+ Android.bp                 | 5 +++++
+ tests/robotests/Android.mk | 4 ++++
+ 2 files changed, 9 insertions(+)
+
+diff --git a/Android.bp b/Android.bp
+index 08e0ee116f..c16faff966 100644
+--- a/Android.bp
++++ b/Android.bp
+@@ -1,3 +1,8 @@
++// Bluetooth is in it's own namespace to allow it to be replaced with an
++// alternate implementation.
++soong_namespace {
++}
++
+ // MAP API module
+ 
+ java_library {
+diff --git a/tests/robotests/Android.mk b/tests/robotests/Android.mk
+index 0cb6917ce8..678ab4bc13 100644
+--- a/tests/robotests/Android.mk
++++ b/tests/robotests/Android.mk
+@@ -1,3 +1,5 @@
++ifneq ($(TARGET_USE_QTI_BT_STACK),true)
++
+ #############################################################
+ # Bluetooth Robolectric test target.                        #
+ #############################################################
+@@ -45,3 +47,5 @@ LOCAL_TEST_PACKAGE := Bluetooth
+ LOCAL_INSTRUMENT_SOURCE_DIRS := $(dir $(LOCAL_PATH))../src
+ 
+ include external/robolectric-shadows/run_robotests.mk
++
++endif
+-- 
+2.28.0
+

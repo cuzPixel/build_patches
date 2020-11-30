@@ -1,0 +1,100 @@
+From f9f207dfa4f6496c9907f580cf0981926d4da571 Mon Sep 17 00:00:00 2001
+From: Venkata Jagadeesh Garaga <vgaraga@codeaurora.org>
+Date: Mon, 2 Mar 2020 14:42:48 +0530
+Subject: [PATCH 17/37] GAP: Handle the race condition cases in auto connect
+ logic
+
+Issue:
+Auto connection failing when onUuidChanged and onBondingStateChanged
+triggered in race condition.
+
+Steps:
+1.Turn on BT
+2.Scan the remote headset from DUT
+3.Initiating pairing to remote device
+4.unpair the remote from DUT UI
+
+Repeat steps from 2 to 4. Some times auto connection not
+getting initiated from DUT.
+
+Root Cause:
+if mProfiles accessed simultaneously from onUuidChanged and
+connectAllEnabledProfiles with two different process context.
+mProfiles not reflecting latest value in connectAllEnabledProfiles,
+Settings not able to initiate Auto connection as mProfiles
+list shown as empty.
+
+onBondingStateChanged getting triggered multiple times from settings
+with different process contexts and BondingInitiatedLocally resets in first
+instance when no profiles added, its leading auto connection failure
+
+FIX:
+- mProfiles accessed inside onUuidChanged without syncronization,also
+  mProfiles empty check already there in connectWithoutResettingTimer
+
+- Hence remove redundant mProfiles empty check in onUuidChanged
+
+- Reset BondingInitiatedLocally flag while initiating connection.
+
+[wight554: updated code from LA.QSSI.11.0.r1-05600-qssi.0]
+
+ Conflicts:
+	packages/SettingsLib/src/com/android/settingslib/bluetooth/CachedBluetoothDevice.java
+
+Change-Id: I88aa6a6cd46d264f4dd32db71e413079bbd40779
+CRs-Fixed: 2630956
+Signed-off-by: Volodymyr Zhdanov <wight554@gmail.com>
+---
+ .../bluetooth/CachedBluetoothDevice.java          | 15 ++++++++++-----
+ 1 file changed, 10 insertions(+), 5 deletions(-)
+
+diff --git a/packages/SettingsLib/src/com/android/settingslib/bluetooth/CachedBluetoothDevice.java b/packages/SettingsLib/src/com/android/settingslib/bluetooth/CachedBluetoothDevice.java
+index 8b588348acd..37802a82304 100644
+--- a/packages/SettingsLib/src/com/android/settingslib/bluetooth/CachedBluetoothDevice.java
++++ b/packages/SettingsLib/src/com/android/settingslib/bluetooth/CachedBluetoothDevice.java
+@@ -307,6 +307,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice>
+         }
+ 
+         mConnectAttempted = SystemClock.elapsedRealtime();
++        Log.d(TAG, "connect: mConnectAttempted = " + mConnectAttempted);
+         connectAllEnabledProfiles();
+     }
+ 
+@@ -345,6 +346,13 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice>
+                 Log.d(TAG, "No profiles. Maybe we will connect later for device " + mDevice);
+                 return;
+             }
++            // BondingInitiatedLocally flag should be reset in onBondingStateChanged
++            // But Settings executing onBondingStateChanged twice and its lead to auto connection
++            // failure. this flag will be moved from here once settings issue fixed.
++            if (mDevice.isBondingInitiatedLocally()) {
++                Log.w(TAG, "reset BondingInitiatedLocally flag");
++                mDevice.setBondingInitiatedLocally(false);
++            }
+ 
+             mLocalAdapter.connectAllEnabledProfiles(mDevice);
+         }
+@@ -724,8 +732,8 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice>
+          * If a connect was attempted earlier without any UUID, we will do the connect now.
+          * Otherwise, allow the connect on UUID change.
+          */
+-        if (!mProfiles.isEmpty()
+-                && ((mConnectAttempted + timeout) > SystemClock.elapsedRealtime())) {
++        if ((mConnectAttempted + timeout) > SystemClock.elapsedRealtime()) {
++            Log.d(TAG, "onUuidChanged: triggering connectAllEnabledProfiles");
+             connectAllEnabledProfiles();
+         }
+ 
+@@ -747,9 +755,6 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice>
+         if (bondState == BluetoothDevice.BOND_BONDED) {
+             boolean mIsBondingInitiatedLocally = mDevice.isBondingInitiatedLocally();
+             Log.w(TAG, "mIsBondingInitiatedLocally" + mIsBondingInitiatedLocally);
+-            if (mIsBondingInitiatedLocally) {
+-                mDevice.setBondingInitiatedLocally(false);
+-            }
+             if (mIsTwsConnectEnabled) {
+                 Log.d(TAG, "Initiating connection to" + mDevice);
+                 if (mIsBondingInitiatedLocally || mDevice.isTwsPlusDevice()) {
+-- 
+2.28.0
+

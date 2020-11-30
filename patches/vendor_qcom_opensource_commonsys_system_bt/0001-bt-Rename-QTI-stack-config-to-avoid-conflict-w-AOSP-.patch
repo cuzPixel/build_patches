@@ -1,0 +1,73 @@
+From e6f97454b3004e30fda8367741405547cb40c251 Mon Sep 17 00:00:00 2001
+From: dianlujitao <dianlujitao@lineageos.org>
+Date: Mon, 25 May 2020 11:01:19 +0800
+Subject: [PATCH] bt: Rename QTI stack config to avoid conflict w/ AOSP one
+
+[wight554: updated for Android.bp]
+
+Change-Id: I43b914e151f7d27fe1ae4e174db237b1035761e7
+Signed-off-by: Volodymyr Zhdanov <wight554@gmail.com>
+---
+ conf/Android.bp                           | 6 +++---
+ conf/{bt_stack.conf => bt_stack_qti.conf} | 0
+ main/Android.bp                           | 2 +-
+ main/stack_config.cc                      | 4 ++--
+ 4 files changed, 6 insertions(+), 6 deletions(-)
+ rename conf/{bt_stack.conf => bt_stack_qti.conf} (100%)
+
+diff --git a/conf/Android.bp b/conf/Android.bp
+index 2533783..bb0c8d4 100644
+--- a/conf/Android.bp
++++ b/conf/Android.bp
+@@ -1,12 +1,12 @@
+ soong_namespace {
+ }
+ 
+-// Bluetooth bt_stack.conf config file
++// Bluetooth bt_stack_qti.conf config file
+ // ========================================================
+ prebuilt_etc {
+-    name: "bt_stack.conf",
++    name: "bt_stack_qti.conf",
+ 
+-    src: "bt_stack.conf",
++    src: "bt_stack_qti.conf",
+     sub_dir: "bluetooth",
+ 
+ }
+diff --git a/conf/bt_stack.conf b/conf/bt_stack_qti.conf
+similarity index 100%
+rename from conf/bt_stack.conf
+rename to conf/bt_stack_qti.conf
+diff --git a/main/Android.bp b/main/Android.bp
+index b269ae0..3161b78 100644
+--- a/main/Android.bp
++++ b/main/Android.bp
+@@ -90,7 +90,7 @@ cc_library_shared {
+     ldflags: ["-Wl,-Bsymbolic,-Bsymbolic-functions"],
+     required: [
+         "bt_did.conf",
+-        "bt_stack.conf",
++        "bt_stack_qti.conf",
+         "interop_database.conf",
+         "bt_profile.conf",
+         "libbt-hci_qti",
+diff --git a/main/stack_config.cc b/main/stack_config.cc
+index 48f4f4d..9996299 100644
+--- a/main/stack_config.cc
++++ b/main/stack_config.cc
+@@ -48,9 +48,9 @@ static config_t* config;
+ static future_t* init() {
+ // TODO(armansito): Find a better way than searching by a hardcoded path.
+ #if defined(OS_GENERIC)
+-  const char* path = "bt_stack.conf";
++  const char* path = "bt_stack_qti.conf";
+ #else  // !defined(OS_GENERIC)
+-  const char* path = "/etc/bluetooth/bt_stack.conf";
++  const char* path = "/etc/bluetooth/bt_stack_qti.conf";
+ #endif  // defined(OS_GENERIC)
+   CHECK(path != NULL);
+ 
+-- 
+2.28.0
+

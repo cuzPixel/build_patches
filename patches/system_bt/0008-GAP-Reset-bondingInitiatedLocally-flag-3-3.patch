@@ -1,0 +1,39 @@
+From 0369f3917c91743bccbcf6f26f059e6d19084e8e Mon Sep 17 00:00:00 2001
+From: Venkata Jagadeesh Garaga <vgaraga@codeaurora.org>
+Date: Thu, 27 Jun 2019 11:26:56 +0530
+Subject: [PATCH 08/10] GAP: Reset bondingInitiatedLocally flag(3/3)
+
+When Pairing initiated from DUT, bondingIinitiatedLocally
+flag sets from adapterservice. If user disable profile
+options from UI and tries to connect from remote,DUT
+rejects the incoming connection, when dut rejects
+connection some remotes may initiates pairing agiagn.
+
+Profile options should be in disable state after incoming
+pairing successful as user disabled profile options, but
+profile options getting enabled as bondingInitiatedLocally
+not reset.
+
+Hence Reset bondingInitiatedLocally flag after connection
+
+Change-Id: I2937e2d6e323660810c6c821ec62e3f636ed1b15
+CRs-Fixed: 2457374
+---
+ binder/android/bluetooth/IBluetooth.aidl | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/binder/android/bluetooth/IBluetooth.aidl b/binder/android/bluetooth/IBluetooth.aidl
+index 263598e88..93366daab 100644
+--- a/binder/android/bluetooth/IBluetooth.aidl
++++ b/binder/android/bluetooth/IBluetooth.aidl
+@@ -106,6 +106,7 @@ interface IBluetooth
+     boolean removeBond(in BluetoothDevice device);
+     int getBondState(in BluetoothDevice device);
+     boolean isBondingInitiatedLocally(in BluetoothDevice device);
++    void setBondingInitiatedLocally(in BluetoothDevice devicei, in boolean localInitiated);
+     long getSupportedProfiles();
+     int getConnectionState(in BluetoothDevice device);
+ 
+-- 
+2.28.0
+
