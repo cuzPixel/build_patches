@@ -1,0 +1,35 @@
+From 47255468f553399a3a2c164ae51e221c6dbb4b83 Mon Sep 17 00:00:00 2001
+From: Gurpreet Ghai <gghai@codeaurora.org>
+Date: Wed, 28 Aug 2019 11:07:01 +0530
+Subject: [PATCH 38/38] Audio: Do not disconnect profiles till Bluetooth Off
+
+- Disconnecting and clearing Bluetooth Profiles during
+  Turning Off State doesn't give chance to A2DP/AVRCP
+  profiles to save and retain Audio related data like
+  Volume level.
+- This change ensures Audio Service only disconnect
+  Bluetooth Profile on receiving Bluetooth Off state.
+
+Change-Id: Ie99cb2b35b9ddc7e4f0d0f89407cda9641379fb8
+CRs-Fixed: 2512169
+---
+ services/core/java/com/android/server/audio/AudioService.java | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/services/core/java/com/android/server/audio/AudioService.java b/services/core/java/com/android/server/audio/AudioService.java
+index 1e078c0b..733ca5a2 100755
+--- a/services/core/java/com/android/server/audio/AudioService.java
++++ b/services/core/java/com/android/server/audio/AudioService.java
+@@ -6756,8 +6756,7 @@ public class AudioService extends IAudioService.Stub
+                         UserManager.DISALLOW_RECORD_AUDIO, false, userId);
+             } else if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
+                 state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1);
+-                if (state == BluetoothAdapter.STATE_OFF ||
+-                        state == BluetoothAdapter.STATE_TURNING_OFF) {
++                if (state == BluetoothAdapter.STATE_OFF) {
+                     mDeviceBroker.disconnectAllBluetoothProfiles();
+                 }
+             } else if (action.equals(AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION) ||
+-- 
+2.28.0
+

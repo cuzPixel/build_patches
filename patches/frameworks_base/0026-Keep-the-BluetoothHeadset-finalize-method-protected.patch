@@ -1,0 +1,28 @@
+From e6a90369898a2eb161f1ef0e9eea843febda3002 Mon Sep 17 00:00:00 2001
+From: Diego Wilson <diegowilson@google.com>
+Date: Thu, 4 Oct 2018 13:37:00 -0700
+Subject: [PATCH 26/38] Keep the BluetoothHeadset finalize() method protected
+
+It seems the scope of this method was accidentally changed to public.
+
+Change-Id: I0c034e43bdd07324bf1c40995ed62ed2af440f2e
+---
+ core/java/android/bluetooth/BluetoothHeadset.java | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/core/java/android/bluetooth/BluetoothHeadset.java b/core/java/android/bluetooth/BluetoothHeadset.java
+index 6de8bdc3..5d5a3d2a 100644
+--- a/core/java/android/bluetooth/BluetoothHeadset.java
++++ b/core/java/android/bluetooth/BluetoothHeadset.java
+@@ -452,7 +452,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
+         doUnbind();
+     }
+ 
+-    public void finalize() {
++    protected void finalize() {
+         close();
+     }
+ 
+-- 
+2.28.0
+

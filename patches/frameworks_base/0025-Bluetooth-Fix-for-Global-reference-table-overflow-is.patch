@@ -1,0 +1,62 @@
+From 5de3b6cc27f42467d5616228d7c9430fd0c3fa9a Mon Sep 17 00:00:00 2001
+From: Bandari Ramesh <ramban@codeaurora.org>
+Date: Wed, 8 Nov 2017 18:51:04 +0530
+Subject: [PATCH 25/38] Bluetooth: Fix for Global reference table overflow
+ issue[1/2]
+
+ -  To avoid RemoteCallbackList object leaks in Bluetooth Manager
+    Service, Added unregister API in BluetoothAdapter.java which
+    internally calls unregisterAdapter of Manager Service
+
+CRs-Fixed: 2138560
+Change-Id: I58ce5f5e1b86d87e0ff602b453abb74d0b5e1982
+---
+ .../java/android/bluetooth/BluetoothAdapter.java | 16 ++++++++++++++++
+ .../java/android/bluetooth/BluetoothHeadset.java |  4 ++++
+ 2 files changed, 20 insertions(+)
+
+diff --git a/core/java/android/bluetooth/BluetoothAdapter.java b/core/java/android/bluetooth/BluetoothAdapter.java
+index 29a98faf..08d0d1d1 100644
+--- a/core/java/android/bluetooth/BluetoothAdapter.java
++++ b/core/java/android/bluetooth/BluetoothAdapter.java
+@@ -3099,6 +3099,22 @@ public final class BluetoothAdapter {
+         }
+     }
+ 
++    /**
++     * @hide
++     */
++    public void unregisterAdapter() {
++        try {
++            //mServiceLock.writeLock().lock();
++            if (mManagerService != null){
++                mManagerService.unregisterAdapter(mManagerCallback);
++            }
++        } catch (RemoteException e) {
++            Log.e(TAG, "", e);
++        } finally {
++            //mServiceLock.writeLock().unlock();
++        }
++    }
++
+     private Set<BluetoothDevice> toDeviceSet(BluetoothDevice[] devices) {
+         Set<BluetoothDevice> deviceSet = new HashSet<BluetoothDevice>(Arrays.asList(devices));
+         return Collections.unmodifiableSet(deviceSet);
+diff --git a/core/java/android/bluetooth/BluetoothHeadset.java b/core/java/android/bluetooth/BluetoothHeadset.java
+index 11efa56f..6de8bdc3 100644
+--- a/core/java/android/bluetooth/BluetoothHeadset.java
++++ b/core/java/android/bluetooth/BluetoothHeadset.java
+@@ -452,6 +452,10 @@ public final class BluetoothHeadset implements BluetoothProfile {
+         doUnbind();
+     }
+ 
++    public void finalize() {
++        close();
++    }
++
+     /**
+      * Initiate connection to a profile of the remote bluetooth device.
+      *
+-- 
+2.28.0
+

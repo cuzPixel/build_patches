@@ -1,0 +1,96 @@
+From 2e8014c73fba8fb6ba7be00a7cbcf201dd4f077e Mon Sep 17 00:00:00 2001
+From: Kiran Kelageri <kirankelageri@codeaurora.org>
+Date: Thu, 5 Apr 2018 00:18:10 -0700
+Subject: [PATCH 07/38] Bluetooth: Unpair both earbuds on unpair.
+
+1> On unpair initiation to primary, Initiate Unpair
+   for peer secondary TWS device as well.
+2> On pairing to primary earbud, Initiate connection to second
+   earbud.
+
+[wight554: updated code from LA.QSSI.11.0.r1-05600-qssi.0]
+
+ Conflicts:
+	packages/SettingsLib/src/com/android/settingslib/bluetooth/CachedBluetoothDevice.java
+
+CRs-fixed: 2230362
+Change-Id: I0d0e7c3bc66d4ff24a2b767996bc1367022901d6
+Signed-off-by: Volodymyr Zhdanov <wight554@gmail.com>
+---
+ .../bluetooth/CachedBluetoothDevice.java      | 39 ++++++++++++++++++-
+ 1 file changed, 37 insertions(+), 2 deletions(-)
+
+diff --git a/packages/SettingsLib/src/com/android/settingslib/bluetooth/CachedBluetoothDevice.java b/packages/SettingsLib/src/com/android/settingslib/bluetooth/CachedBluetoothDevice.java
+index db219c9c..3e42a35a 100644
+--- a/packages/SettingsLib/src/com/android/settingslib/bluetooth/CachedBluetoothDevice.java
++++ b/packages/SettingsLib/src/com/android/settingslib/bluetooth/CachedBluetoothDevice.java
+@@ -29,6 +29,7 @@ import android.os.Looper;
+ import android.os.Message;
+ import android.os.ParcelUuid;
+ import android.os.SystemClock;
++import android.os.SystemProperties;
+ import android.text.TextUtils;
+ import android.util.EventLog;
+ import android.util.Log;
+@@ -133,6 +134,22 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice>
+         mHiSyncId = BluetoothHearingAid.HI_SYNC_ID_INVALID;
+     }
+ 
++    /* Gets Device for seondary TWS device
++     * @param mDevice Primary TWS device  to get secondary
++     * @return Description of the device
++     */
++
++    private BluetoothDevice getTwsPeerDevice() {
++      BluetoothAdapter bluetoothAdapter;
++      BluetoothDevice peerDevice = null;
++      if (mDevice.isTwsPlusDevice()) {
++        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
++        String peerAddress = mDevice.getTwsPlusPeerAddress();
++        peerDevice = bluetoothAdapter.getRemoteDevice(peerAddress);
++      }
++      return peerDevice;
++    }
++
+     /**
+      * Describes the current device and profile for logging.
+      *
+@@ -381,6 +398,17 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice>
+ 
+         if (state != BluetoothDevice.BOND_NONE) {
+             final BluetoothDevice dev = mDevice;
++            if (mDevice.isTwsPlusDevice()) {
++               BluetoothDevice peerDevice = getTwsPeerDevice();
++               if (peerDevice != null) {
++                   final boolean peersuccessful = peerDevice.removeBond();
++                   if (peersuccessful) {
++                       if (Utils.D) {
++                           Log.d(TAG, "Command sent successfully:REMOVE_BOND " + peerDevice.getName());
++                       }
++                   }
++                }
++            }
+             if (dev != null) {
+                 final boolean successful = dev.removeBond();
+                 if (successful) {
+@@ -708,8 +736,15 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice>
+ 
+         refresh();
+ 
+-        if (bondState == BluetoothDevice.BOND_BONDED && mDevice.isBondingInitiatedLocally()) {
+-            connect();
++        if (bondState == BluetoothDevice.BOND_BONDED) {
++            if (SystemProperties.getBoolean("persist.vendor.bt.connect.peer_earbud", true)) {
++                Log.d(TAG, "Initiating connection to" + mDevice);
++                if (mDevice.isBondingInitiatedLocally() || mDevice.isTwsPlusDevice()) {
++                    connect();
++                }
++            } else if (mDevice.isBondingInitiatedLocally()) {
++                connect();
++            }
+         }
+     }
+ 
+-- 
+2.28.0
+

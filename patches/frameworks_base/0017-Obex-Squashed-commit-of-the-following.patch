@@ -1,0 +1,468 @@
+From f72d5e9dd60678f96f618dac03aab7caf43a78f5 Mon Sep 17 00:00:00 2001
+From: Sravan Kumar V <sravankumar@codeaurora.org>
+Date: Thu, 1 Feb 2018 15:51:00 +0530
+Subject: [PATCH 17/38] Obex: Squashed commit of the following
+
+Obex : Reduce MTU Size.
+
+Use case:
+1. Start Low Latency and High Tx Power adv from the DUT
+2. From a 2nd DUT scan, connect and pair with the LEP DUT
+3. Connect the DUT to a SCO HS
+4. Connect the DUT to 2 BR/EDR HID devices
+5. Start MO call from the DUT going over SCO
+6. Start sending a file from Phone over OPP to the DUT
+
+Result:
+After a while the OPP link disconnects
+reason: "Connection Timeout"
+
+Fix:
+Reduce Obex MTU to 8k if reduce MTU is enable
+Change-Id: I21cb27ff98e07cd923d6e28a67b3b52835b68956
+
+OBEX: Dynamic VERBOSE level logging for OBEX.
+- Support runtime VERBOSE level logging control
+  for  OBEX lib.
+- Added extra informative logs useful to
+  debug issues from Obex layer.
+
+Change-Id: If94c88b438b3c283aca0ba4cc46f42bb1d8c37eb
+
+OBEX : Handle Negative index Exception
+
+Use case:
+1. Send file to remote device.
+2. Wait for accepting the file transfer on remote device.
+   Use Specific remote device(that sends some
+      optional headers).
+
+Failure:
+No file acceptance popup seen on remote device.
+
+Root cause:
+Failure in com.android.bluetooth.
+
+FATAL EXCEPTION: BtOpp ClientThread
+Process: com.android.bluetooth, PID: 22527
+  java.lang.NegativeArraySizeException: -3
+  at javax.obex.ObexHelper.updateHeaderSet(ObexHelper.java:216)
+  at javax.obex.ClientSession.sendRequest(ClientSession.java:568)
+  at javax.obex.ClientSession.connect(ClientSession.java:148)
+  at com.android.bluetooth.opp.BluetoothOppObexClientSession$ClientThread.
+  connect(BluetoothOppObexClientSession.java:317)
+  at com.android.bluetooth.opp.BluetoothOppObexClientSession$ClientThread.
+  run(BluetoothOppObexClientSession.java:231)
+  am_craash( 1402): [22527,0,com.android.bluetooth,818462277,java.lang.
+  NegativeArraySizeException,-3,ObexHelper.java,216]
+
+Fix:
+Add length check before allocate memory and break loop if length is less than
+expected header length as per OBEX Specification.
+
+CRs-Fixed: 2197150
+Change-Id: I805e6b1d51f69645d5132c3c18db2e752d04b096
+---
+ obex/javax/obex/ClientOperation.java |  2 +-
+ obex/javax/obex/ClientSession.java   |  2 +-
+ obex/javax/obex/ObexHelper.java      | 32 ++++++++++++++++----
+ obex/javax/obex/ServerOperation.java |  9 +++++-
+ obex/javax/obex/ServerSession.java   | 44 +++++++++++++++++++++++++++-
+ 5 files changed, 80 insertions(+), 9 deletions(-)
+
+diff --git a/obex/javax/obex/ClientOperation.java b/obex/javax/obex/ClientOperation.java
+index c627dfb8..d090bf5c 100644
+--- a/obex/javax/obex/ClientOperation.java
++++ b/obex/javax/obex/ClientOperation.java
+@@ -50,7 +50,7 @@ import android.util.Log;
+  */
+ public final class ClientOperation implements Operation, BaseStream {
+ 
+-    private static final String TAG = "ClientOperation";
++    private static final String TAG = "ObexClientOperation";
+ 
+     private static final boolean V = ObexHelper.VDBG;
+ 
+diff --git a/obex/javax/obex/ClientSession.java b/obex/javax/obex/ClientSession.java
+index 272a9207..9aaf7bcd 100644
+--- a/obex/javax/obex/ClientSession.java
++++ b/obex/javax/obex/ClientSession.java
+@@ -47,7 +47,7 @@ import android.util.Log;
+  */
+ public final class ClientSession extends ObexSession {
+ 
+-    private static final String TAG = "ClientSession";
++    private static final String TAG = "ObexClientSession";
+ 
+     private boolean mOpen;
+ 
+diff --git a/obex/javax/obex/ObexHelper.java b/obex/javax/obex/ObexHelper.java
+index 478297f2..f09d3d3f 100644
+--- a/obex/javax/obex/ObexHelper.java
++++ b/obex/javax/obex/ObexHelper.java
+@@ -52,7 +52,8 @@ import android.util.Log;
+ public final class ObexHelper {
+ 
+     private static final String TAG = "ObexHelper";
+-    public static final boolean VDBG = false;
++    public static final String LOG_TAG = "BluetoothObex";
++    public static final boolean VDBG = Log.isLoggable(LOG_TAG, Log.VERBOSE);
+     /**
+      * Defines the basic packet length used by OBEX. Every OBEX packet has the
+      * same basic format:<BR>
+@@ -89,6 +90,8 @@ public final class ObexHelper {
+      */
+     public static final int MAX_CLIENT_PACKET_SIZE = 0xFC00;
+ 
++    public static final int A2DP_SCO_OBEX_MAX_CLIENT_PACKET_SIZE = 0x2000;
++
+     public static final int OBEX_OPCODE_FINAL_BIT_MASK = 0x80;
+ 
+     public static final int OBEX_OPCODE_CONNECT = 0x80;
+@@ -193,6 +196,7 @@ public final class ObexHelper {
+         try {
+             while (index < headerArray.length) {
+                 headerID = 0xFF & headerArray[index];
++                if (VDBG) Log.v(TAG,"updateHeaderSet headerID = " + headerID);
+                 switch (headerID & (0xC0)) {
+ 
+                     /*
+@@ -211,9 +215,9 @@ public final class ObexHelper {
+                         length = ((0xFF & headerArray[index]) << 8) +
+                                  (0xFF & headerArray[index + 1]);
+                         index += 2;
+-                        if (length <= OBEX_BYTE_SEQ_HEADER_LEN) {
++                        if (length < OBEX_BYTE_SEQ_HEADER_LEN) {
+                             Log.e(TAG, "Remote sent an OBEX packet with " +
+-                                  "incorrect header length = " + length);
++                                  "incorrect header length : " + length);
+                             break;
+                         }
+                         length -= OBEX_BYTE_SEQ_HEADER_LEN;
+@@ -381,8 +385,9 @@ public final class ObexHelper {
+              * Determine if there is a connection ID to send.  If there is,
+              * then it should be the first header in the packet.
+              */
++            if (VDBG) Log.v(TAG,"createHeader = " + head);
+             if ((headImpl.mConnectionID != null) && (headImpl.getHeader(HeaderSet.TARGET) == null)) {
+-
++                if (VDBG) Log.v(TAG," Add Header = " + HeaderSet.CONNECTION_ID);
+                 out.write((byte)HeaderSet.CONNECTION_ID);
+                 out.write(headImpl.mConnectionID);
+             }
+@@ -390,6 +395,7 @@ public final class ObexHelper {
+             // Count Header
+             intHeader = (Long)headImpl.getHeader(HeaderSet.COUNT);
+             if (intHeader != null) {
++                if (VDBG) Log.v(TAG," Add Header = " + HeaderSet.COUNT);
+                 out.write((byte)HeaderSet.COUNT);
+                 value = ObexHelper.convertToByteArray(intHeader.longValue());
+                 out.write(value);
+@@ -401,6 +407,7 @@ public final class ObexHelper {
+             // Name Header
+             stringHeader = (String)headImpl.getHeader(HeaderSet.NAME);
+             if (stringHeader != null) {
++                if (VDBG) Log.v(TAG," Add Header = " + HeaderSet.NAME);
+                 out.write((byte)HeaderSet.NAME);
+                 value = ObexHelper.convertToUnicodeByteArray(stringHeader);
+                 length = value.length + 3;
+@@ -421,6 +428,7 @@ public final class ObexHelper {
+             // Type Header
+             stringHeader = (String)headImpl.getHeader(HeaderSet.TYPE);
+             if (stringHeader != null) {
++                if (VDBG) Log.v(TAG," Add Header = " + HeaderSet.TYPE);
+                 out.write((byte)HeaderSet.TYPE);
+                 try {
+                     value = stringHeader.getBytes("ISO8859_1");
+@@ -442,6 +450,7 @@ public final class ObexHelper {
+             // Length Header
+             intHeader = (Long)headImpl.getHeader(HeaderSet.LENGTH);
+             if (intHeader != null) {
++                if (VDBG) Log.v(TAG," Add Header = " + HeaderSet.LENGTH);
+                 out.write((byte)HeaderSet.LENGTH);
+                 value = ObexHelper.convertToByteArray(intHeader.longValue());
+                 out.write(value);
+@@ -453,7 +462,7 @@ public final class ObexHelper {
+             // Time ISO Header
+             dateHeader = (Calendar)headImpl.getHeader(HeaderSet.TIME_ISO_8601);
+             if (dateHeader != null) {
+-
++                if (VDBG) Log.v(TAG," Add dateHeader = " + HeaderSet.TIME_ISO_8601);
+                 /*
+                  * The ISO Header should take the form YYYYMMDDTHHMMSSZ.  The
+                  * 'Z' will only be included if it is a UTC time.
+@@ -515,6 +524,7 @@ public final class ObexHelper {
+             // Time 4 Byte Header
+             dateHeader = (Calendar)headImpl.getHeader(HeaderSet.TIME_4_BYTE);
+             if (dateHeader != null) {
++                if (VDBG) Log.v(TAG," Add dateHeader = " + HeaderSet.TIME_4_BYTE);
+                 out.write(HeaderSet.TIME_4_BYTE);
+ 
+                 /*
+@@ -549,6 +559,7 @@ public final class ObexHelper {
+             // Target Header
+             value = (byte[])headImpl.getHeader(HeaderSet.TARGET);
+             if (value != null) {
++                if (VDBG) Log.v(TAG," Add Header = " + HeaderSet.TARGET);
+                 out.write((byte)HeaderSet.TARGET);
+                 length = value.length + 3;
+                 lengthArray[0] = (byte)(255 & (length >> 8));
+@@ -577,6 +588,7 @@ public final class ObexHelper {
+             // Who Header
+             value = (byte[])headImpl.getHeader(HeaderSet.WHO);
+             if (value != null) {
++                if (VDBG) Log.v(TAG," Add Header = " + HeaderSet.WHO);
+                 out.write((byte)HeaderSet.WHO);
+                 length = value.length + 3;
+                 lengthArray[0] = (byte)(255 & (length >> 8));
+@@ -591,6 +603,7 @@ public final class ObexHelper {
+             // Connection ID Header
+             value = (byte[])headImpl.getHeader(HeaderSet.APPLICATION_PARAMETER);
+             if (value != null) {
++                if (VDBG) Log.v(TAG," Add APP PARAM Header = " + HeaderSet.APPLICATION_PARAMETER);
+                 out.write((byte)HeaderSet.APPLICATION_PARAMETER);
+                 length = value.length + 3;
+                 lengthArray[0] = (byte)(255 & (length >> 8));
+@@ -629,6 +642,7 @@ public final class ObexHelper {
+                     lengthArray[1] = (byte)(255 & length);
+                     out.write(lengthArray);
+                     out.write(value);
++                    if (VDBG) Log.v(TAG," Add Unicode String value = " + value);
+                     if (nullOut) {
+                         headImpl.setHeader(i + 0x30, null);
+                     }
+@@ -643,6 +657,7 @@ public final class ObexHelper {
+                     lengthArray[1] = (byte)(255 & length);
+                     out.write(lengthArray);
+                     out.write(value);
++                    if (VDBG) Log.v(TAG," Add ByteSeq value = " + value);
+                     if (nullOut) {
+                         headImpl.setHeader(i + 0x70, null);
+                     }
+@@ -653,6 +668,7 @@ public final class ObexHelper {
+                 if (byteHeader != null) {
+                     out.write((byte)i + 0xB0);
+                     out.write(byteHeader.byteValue());
++                    if (VDBG) Log.v(TAG," Add ByteHeader value = " + byteHeader.byteValue());
+                     if (nullOut) {
+                         headImpl.setHeader(i + 0xB0, null);
+                     }
+@@ -663,6 +679,7 @@ public final class ObexHelper {
+                 if (intHeader != null) {
+                     out.write((byte)i + 0xF0);
+                     out.write(ObexHelper.convertToByteArray(intHeader.longValue()));
++                    if (VDBG) Log.v(TAG," Add Int value = " + intHeader.longValue());
+                     if (nullOut) {
+                         headImpl.setHeader(i + 0xF0, null);
+                     }
+@@ -677,6 +694,7 @@ public final class ObexHelper {
+                 lengthArray[1] = (byte)(255 & length);
+                 out.write(lengthArray);
+                 out.write(headImpl.mAuthChall);
++                if (VDBG) Log.v(TAG," Add mAuthChall value = " + headImpl.mAuthChall);
+                 if (nullOut) {
+                     headImpl.mAuthChall = null;
+                 }
+@@ -690,6 +708,7 @@ public final class ObexHelper {
+                 lengthArray[1] = (byte)(255 & length);
+                 out.write(lengthArray);
+                 out.write(headImpl.mAuthResp);
++                if (VDBG) Log.v(TAG," Add mAuthChall value = " + headImpl.mAuthResp);
+                 if (nullOut) {
+                     headImpl.mAuthResp = null;
+                 }
+@@ -705,8 +724,10 @@ public final class ObexHelper {
+             // Add the SRM header
+             byteHeader = (Byte)headImpl.getHeader(HeaderSet.SINGLE_RESPONSE_MODE);
+             if (byteHeader != null) {
++                if (VDBG) Log.v(TAG," Add SRM Header = " + HeaderSet.SINGLE_RESPONSE_MODE);
+                 out.write((byte)HeaderSet.SINGLE_RESPONSE_MODE);
+                 out.write(byteHeader.byteValue());
++                if (VDBG) Log.v(TAG," Add SRM value = " + byteHeader.byteValue());
+                 if (nullOut) {
+                     headImpl.setHeader(HeaderSet.SINGLE_RESPONSE_MODE, null);
+                 }
+@@ -715,6 +736,7 @@ public final class ObexHelper {
+             // Add the SRM parameter header
+             byteHeader = (Byte)headImpl.getHeader(HeaderSet.SINGLE_RESPONSE_MODE_PARAMETER);
+             if (byteHeader != null) {
++                if (VDBG) Log.v(TAG," Add Header = " + HeaderSet.SINGLE_RESPONSE_MODE_PARAMETER);
+                 out.write((byte)HeaderSet.SINGLE_RESPONSE_MODE_PARAMETER);
+                 out.write(byteHeader.byteValue());
+                 if (nullOut) {
+diff --git a/obex/javax/obex/ServerOperation.java b/obex/javax/obex/ServerOperation.java
+index 15ea3678..1cc720b3 100644
+--- a/obex/javax/obex/ServerOperation.java
++++ b/obex/javax/obex/ServerOperation.java
+@@ -57,7 +57,7 @@ import android.util.Log;
+  */
+ public final class ServerOperation implements Operation, BaseStream {
+ 
+-    private static final String TAG = "ServerOperation";
++    private static final String TAG = "ObexServerOperation";
+ 
+     private static final boolean V = ObexHelper.VDBG; // Verbose debugging
+ 
+@@ -124,6 +124,7 @@ public final class ServerOperation implements Operation, BaseStream {
+      */
+     public ServerOperation(ServerSession p, InputStream in, int request, int maxSize,
+             ServerRequestHandler listen) throws IOException {
++        if (V)  Log.v(TAG, "ServerOperation");
+ 
+         isAborted = false;
+         mParent = p;
+@@ -340,14 +341,17 @@ public final class ServerOperation implements Operation, BaseStream {
+      */
+     public synchronized boolean continueOperation(boolean sendEmpty, boolean inStream)
+             throws IOException {
++        if (V) Log.v(TAG, "continueOperation");
+         if (!mGetOperation) {
+             if (!finalBitSet) {
+                 if (sendEmpty) {
+                     sendReply(ResponseCodes.OBEX_HTTP_CONTINUE);
++                    if (V) Log.v(TAG, "continueOperation:ServerSet SRM sendEmpty clause");
+                     return true;
+                 } else {
+                     if ((mResponseSize > 3) || (mPrivateOutput.size() > 0)) {
+                         sendReply(ResponseCodes.OBEX_HTTP_CONTINUE);
++                        if (V) Log.v(TAG, "continueOperation: Server setting SRM");
+                         return true;
+                     } else {
+                         return false;
+@@ -357,6 +361,7 @@ public final class ServerOperation implements Operation, BaseStream {
+                 return false;
+             }
+         } else {
++            if (V) Log.v(TAG, "Get continueOperation ");
+             sendReply(ResponseCodes.OBEX_HTTP_CONTINUE);
+             return true;
+         }
+@@ -405,6 +410,8 @@ public final class ServerOperation implements Operation, BaseStream {
+             bodyLength = mPrivateOutput.size();
+             orginalBodyLength = bodyLength;
+         }
++        if(V) Log.v(TAG, "mMaxPcKLen :" + mMaxPacketLength + " headerArryLen :"
++                      + headerArray.length);
+ 
+         if ((ObexHelper.BASE_PACKET_LENGTH + headerArray.length) > mMaxPacketLength) {
+ 
+diff --git a/obex/javax/obex/ServerSession.java b/obex/javax/obex/ServerSession.java
+index dbfeefdf..a45687f7 100644
+--- a/obex/javax/obex/ServerSession.java
++++ b/obex/javax/obex/ServerSession.java
+@@ -63,6 +63,12 @@ public final class ServerSession extends ObexSession implements Runnable {
+ 
+     private boolean mClosed;
+ 
++    private boolean setMTU = false;
++
++    private boolean updateMtu = false;
++
++    private int updatedMtuSize = 0;
++
+     /**
+      * Creates new ServerSession.
+      * @param trans the connection to the client
+@@ -85,6 +91,25 @@ public final class ServerSession extends ObexSession implements Runnable {
+         mProcessThread.start();
+     }
+ 
++    public void setMaxPacketSize(int size) {
++        if (V)  Log.v(TAG, "setMaxPacketSize" + size);
++        mMaxPacketLength = size;
++    }
++
++    public int getMaxPacketSize() {
++       return mMaxPacketLength;
++    }
++
++    public void reduceMTU(boolean enable) {
++        setMTU = enable;
++   }
++
++   public void updateMTU(int mtuSize) {
++        updateMtu = true;
++        updatedMtuSize = mtuSize;
++        Log.i(TAG,"updateMTU: " + mtuSize);
++   }
++
+     /**
+      * Processes requests made to the server and forwards them to the
+      * appropriate event listener.
+@@ -124,6 +149,7 @@ public final class ServerSession extends ObexSession implements Runnable {
+                         break;
+ 
+                     case -1:
++                        Log.d(TAG, "Read request returned -1, exiting from loop");
+                         done = true;
+                         break;
+ 
+@@ -194,6 +220,7 @@ public final class ServerSession extends ObexSession implements Runnable {
+      * @throws IOException if an error occurred at the transport layer
+      */
+     private void handlePutRequest(int type) throws IOException {
++        if (V)  Log.v(TAG, "handlePutRequest");
+         ServerOperation op = new ServerOperation(this, mInput, type, mMaxPacketLength, mListener);
+         try {
+             int response = -1;
+@@ -205,10 +232,12 @@ public final class ServerSession extends ObexSession implements Runnable {
+                 response = validateResponseCode(mListener.onPut(op));
+             }
+             if (response != ResponseCodes.OBEX_HTTP_OK && !op.isAborted) {
++                if (V) Log.v(TAG, "handlePutRequest pre != HTTP_OK sendReply");
+                 op.sendReply(response);
+             } else if (!op.isAborted) {
+                 // wait for the final bit
+                 while (!op.finalBitSet) {
++                    if (V) Log.v(TAG, "handlePutRequest pre looped sendReply");
+                     op.sendReply(ResponseCodes.OBEX_HTTP_CONTINUE);
+                 }
+                 op.sendReply(response);
+@@ -240,6 +269,7 @@ public final class ServerSession extends ObexSession implements Runnable {
+      * @throws IOException if an error occurred at the transport layer
+      */
+     private void handleGetRequest(int type) throws IOException {
++        if (V)  Log.v(TAG, "handleGetRequest");
+         ServerOperation op = new ServerOperation(this, mInput, type, mMaxPacketLength, mListener);
+         try {
+             int response = validateResponseCode(mListener.onGet(op));
+@@ -262,6 +292,7 @@ public final class ServerSession extends ObexSession implements Runnable {
+     public void sendResponse(int code, byte[] header) throws IOException {
+         int totalLength = 3;
+         byte[] data = null;
++        if (V) Log.v(TAG,"sendResponse code " + code + " header : " + header);
+         OutputStream op = mOutput;
+         if (op == null) {
+             return;
+@@ -269,6 +300,7 @@ public final class ServerSession extends ObexSession implements Runnable {
+ 
+         if (header != null) {
+             totalLength += header.length;
++            if (V) Log.v(TAG, "header != null totalLength = " + totalLength);
+             data = new byte[totalLength];
+             data[0] = (byte)code;
+             data[1] = (byte)(totalLength >> 8);
+@@ -558,9 +590,19 @@ public final class ServerSession extends ObexSession implements Runnable {
+                 + " MaxLength: " + mMaxPacketLength + " flags: " + flags);
+ 
+         // should we check it?
+-        if (mMaxPacketLength > ObexHelper.MAX_PACKET_SIZE_INT) {
++        if (setMTU) {
++            mMaxPacketLength = ObexHelper.A2DP_SCO_OBEX_MAX_CLIENT_PACKET_SIZE;
++            setMTU = false;
++        } else if (updateMtu) {
++            Log.d(TAG, "mMaxPacketLength: " + mMaxPacketLength +
++                    ", updatedMtuSize: " + updatedMtuSize);
++            if (mMaxPacketLength > updatedMtuSize)
++                mMaxPacketLength = updatedMtuSize;
++            updateMtu = false;
++        } else if (mMaxPacketLength > ObexHelper.MAX_PACKET_SIZE_INT) {
+             mMaxPacketLength = ObexHelper.MAX_PACKET_SIZE_INT;
+         }
++        Log.d(TAG,"handleConnectRequest() - Updated MaxPacketLengh: " + mMaxPacketLength);
+ 
+         if(mMaxPacketLength > ObexHelper.getMaxTxPacketSize(mTransport)) {
+             Log.w(TAG, "Requested MaxObexPacketSize " + mMaxPacketLength
+-- 
+2.28.0
+

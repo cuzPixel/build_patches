@@ -1,0 +1,243 @@
+From 3b9137d32316e98b381b920f10922a68ff355ad0 Mon Sep 17 00:00:00 2001
+From: Samyak Jain <samyjain@codeaurora.org>
+Date: Wed, 19 Jun 2019 17:34:20 +0530
+Subject: [PATCH 05/38] Revert the change: AudioService: remove dead BT code.
+
+[wight554: updated code from LA.QSSI.11.0.r1-05600-qssi.0]
+
+ Conflicts:
+	services/core/java/com/android/server/audio/AudioDeviceBroker.java
+	services/core/java/com/android/server/audio/AudioService.java
+
+Change-Id: If9902d3d458b6c5ccd474ffe69133d81beb49ca9
+CRs-Fixed: 2475616
+Signed-off-by: Volodymyr Zhdanov <wight554@gmail.com>
+---
+ media/java/android/media/AudioManager.java    | 32 ++++++++++++++
+ media/java/android/media/IAudioService.aidl   |  3 ++
+ .../server/audio/AudioDeviceBroker.java       | 30 ++++++++++++-
+ .../server/audio/AudioDeviceInventory.java    | 42 +++++++++++++++++++
+ .../android/server/audio/AudioService.java    | 21 ++++++++++
+ 5 files changed, 127 insertions(+), 1 deletion(-)
+
+diff --git a/media/java/android/media/AudioManager.java b/media/java/android/media/AudioManager.java
+index 3ac71b2c..70e0409b 100755
+--- a/media/java/android/media/AudioManager.java
++++ b/media/java/android/media/AudioManager.java
+@@ -4855,6 +4855,38 @@ public class AudioManager {
+         }
+     }
+ 
++     /**
++     * Indicate A2DP source or sink active device change and eventually suppress
++     * the {@link AudioManager.ACTION_AUDIO_BECOMING_NOISY} intent.
++     * This operation is asynchronous but its execution will still be sequentially scheduled
++     * relative to calls to {@link #setBluetoothHearingAidDeviceConnectionState(BluetoothDevice,
++     * int, boolean, int)} and
++     * {@link #handleBluetoothA2dpDeviceConfigChange(BluetoothDevice)}.
++     * @param device Bluetooth device connected/disconnected
++     * @param state  new connection state (BluetoothProfile.STATE_xxx)
++     * @param profile profile for the A2DP device
++     * (either {@link android.bluetooth.BluetoothProfile.A2DP} or
++     * {@link android.bluetooth.BluetoothProfile.A2DP_SINK})
++     * @param a2dpVolume New volume for the connecting device. Does nothing if
++     * disconnecting. Pass value -1 in case you want this field to be ignored
++     * @param suppressNoisyIntent if true the
++     * {@link AudioManager.ACTION_AUDIO_BECOMING_NOISY} intent will not be sent.
++     * @return a delay in ms that the caller should wait before broadcasting
++     * BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED intent.
++     * {@hide}
++     */
++    public void handleBluetoothA2dpActiveDeviceChange(
++                BluetoothDevice device, int state, int profile,
++                boolean suppressNoisyIntent, int a2dpVolume) {
++         final IAudioService service = getService();
++         try {
++             service.handleBluetoothA2dpActiveDeviceChange(device,
++                   state, profile, suppressNoisyIntent, a2dpVolume);
++         } catch (RemoteException e) {
++             throw e.rethrowFromSystemServer();
++         }
++    }
++
+     /** {@hide} */
+     public IRingtonePlayer getRingtonePlayer() {
+         try {
+diff --git a/media/java/android/media/IAudioService.aidl b/media/java/android/media/IAudioService.aidl
+index 4cf236a8..efa32ae5 100755
+--- a/media/java/android/media/IAudioService.aidl
++++ b/media/java/android/media/IAudioService.aidl
+@@ -192,6 +192,9 @@ interface IAudioService {
+ 
+     void handleBluetoothA2dpDeviceConfigChange(in BluetoothDevice device);
+ 
++    void handleBluetoothA2dpActiveDeviceChange(in BluetoothDevice device,
++            int state, int profile, boolean suppressNoisyIntent, int a2dpVolume);
++
+     @UnsupportedAppUsage
+     AudioRoutesInfo startWatchingRoutes(in IAudioRoutesObserver observer);
+ 
+diff --git a/services/core/java/com/android/server/audio/AudioDeviceBroker.java b/services/core/java/com/android/server/audio/AudioDeviceBroker.java
+index 074d3fe1..90ceec2c 100644
+--- a/services/core/java/com/android/server/audio/AudioDeviceBroker.java
++++ b/services/core/java/com/android/server/audio/AudioDeviceBroker.java
+@@ -403,6 +403,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
+                 devInfoToRemove);
+     }
+ 
++    /*package*/ void postBluetoothA2dpDeviceConfigChangeExt(
++            @NonNull BluetoothDevice device,
++            @AudioService.BtProfileConnectionState int state, int profile,
++            boolean suppressNoisyIntent, int a2dpVolume) {
++         final BtDeviceConnectionInfo info = new BtDeviceConnectionInfo(device, state, profile,
++                 suppressNoisyIntent, a2dpVolume);
++         sendLMsgNoDelay(MSG_L_A2DP_ACTIVE_DEVICE_CHANGE_EXT, SENDMSG_QUEUE, info);
++    }
++
+     private static final class HearingAidDeviceConnectionInfo {
+         final @NonNull BluetoothDevice mDevice;
+         final @AudioService.BtProfileConnectionState int mState;
+@@ -1096,6 +1105,22 @@ import java.util.concurrent.atomic.AtomicBoolean;
+                 case MSG_CHECK_MUTE_MUSIC:
+                     checkMessagesMuteMusic(0);
+                     break;
++                case MSG_L_A2DP_ACTIVE_DEVICE_CHANGE_EXT: {
++                    final BtDeviceConnectionInfo info = (BtDeviceConnectionInfo) msg.obj;
++                    AudioService.sDeviceLogger.log((new AudioEventLogger.StringEvent(
++                    "handleBluetoothA2dpActiveDeviceChangeExt "
++                           + " state=" + info.mState
++                           // only querying address as this is the only readily available
++                           // field on the device
++                           + " addr=" + info.mDevice.getAddress()
++                           + " prof=" + info.mProfile + " supprNoisy=" + info.mSupprNoisy
++                           + " vol=" + info.mVolume)).printLog(TAG));
++                    synchronized (mDeviceStateLock) {
++                        mDeviceInventory.handleBluetoothA2dpActiveDeviceChangeExt(
++                                info.mDevice, info.mState, info.mProfile,
++                                info.mSupprNoisy, info.mVolume);
++                    }
++                } break;
+                 default:
+                     Log.wtf(TAG, "Invalid message " + msg.what);
+             }
+@@ -1163,6 +1188,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
+     // process external command to (dis)connect a hearing aid device
+     private static final int MSG_L_HEARING_AID_DEVICE_CONNECTION_CHANGE_EXT = 31;
+ 
++    // process external command to (dis)connect or change active A2DP device
++    private static final int MSG_L_A2DP_ACTIVE_DEVICE_CHANGE_EXT = 38;
++
+     // a ScoClient died in BtHelper
+     private static final int MSG_L_SCOCLIENT_DIED = 32;
+     private static final int MSG_IL_SAVE_PREF_DEVICE_FOR_STRATEGY = 33;
+@@ -1172,7 +1200,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
+     private static final int MSG_CHECK_MUTE_MUSIC = 36;
+     private static final int MSG_REPORT_NEW_ROUTES_A2DP = 37;
+ 
+-
+     private static boolean isMessageHandledUnderWakelock(int msgId) {
+         switch(msgId) {
+             case MSG_L_SET_WIRED_DEVICE_CONNECTION_STATE:
+@@ -1188,6 +1215,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
+             case MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT_DISCONNECTION:
+             case MSG_L_HEARING_AID_DEVICE_CONNECTION_CHANGE_EXT:
+             case MSG_CHECK_MUTE_MUSIC:
++            case MSG_L_A2DP_ACTIVE_DEVICE_CHANGE_EXT:
+                 return true;
+             default:
+                 return false;
+diff --git a/services/core/java/com/android/server/audio/AudioDeviceInventory.java b/services/core/java/com/android/server/audio/AudioDeviceInventory.java
+index 02a846e3..1b262163 100644
+--- a/services/core/java/com/android/server/audio/AudioDeviceInventory.java
++++ b/services/core/java/com/android/server/audio/AudioDeviceInventory.java
+@@ -51,6 +51,7 @@ import java.io.PrintWriter;
+ import java.util.ArrayList;
+ import java.util.HashSet;
+ import java.util.LinkedHashMap;
++import java.util.Map;
+ import java.util.Set;
+ 
+ /**
+@@ -838,6 +839,47 @@ public class AudioDeviceInventory {
+         }
+     }
+ 
++    /*package*/ void handleBluetoothA2dpActiveDeviceChangeExt(
++            @NonNull BluetoothDevice device,
++            @AudioService.BtProfileConnectionState int state, int profile,
++            boolean suppressNoisyIntent, int a2dpVolume) {
++          if (state == BluetoothProfile.STATE_DISCONNECTED) {
++              mDeviceBroker.postBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(
++                             device, state, profile, suppressNoisyIntent, a2dpVolume);
++              return;
++          }
++          // state == BluetoothProfile.STATE_CONNECTED
++          synchronized (mConnectedDevices) {
++                 final String address = device.getAddress();
++                 final int a2dpCodec = mDeviceBroker.getA2dpCodec(device);
++                 final String deviceKey = DeviceInfo.makeDeviceListKey(
++                                AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, address);
++                 DeviceInfo deviceInfo = mConnectedDevices.get(deviceKey);
++                 if (deviceInfo != null) {
++                     // Device config change for matching A2DP device
++                     mDeviceBroker.postBluetoothA2dpDeviceConfigChange(device);
++                     return;
++                 }
++                 for (Map.Entry<String, DeviceInfo> existingDevice : mConnectedDevices.entrySet()) {
++                      if (existingDevice.getValue().mDeviceType != AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP) {
++                          continue;
++                      }
++                      // A2DP device exists, handle active device change
++                      mConnectedDevices.remove(existingDevice.getKey());
++                      mConnectedDevices.put(deviceKey, new DeviceInfo(
++                                 AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, BtHelper.getName(device),
++                                 address, a2dpCodec));
++                      mDeviceBroker.postA2dpActiveDeviceChange(
++                                 new BtHelper.BluetoothA2dpDeviceInfo(
++                                     device, a2dpVolume, a2dpCodec));
++                      return;
++                 }
++          }
++          // New A2DP device connection
++          mDeviceBroker.postBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(
++                             device, state, profile, suppressNoisyIntent, a2dpVolume);
++    }
++
+     /*package*/ int setWiredDeviceConnectionState(int type, @AudioService.ConnectionState int state,
+                                                   String address, String name, String caller) {
+         synchronized (mDevicesLock) {
+diff --git a/services/core/java/com/android/server/audio/AudioService.java b/services/core/java/com/android/server/audio/AudioService.java
+index 7bb3e36d..1e078c0b 100755
+--- a/services/core/java/com/android/server/audio/AudioService.java
++++ b/services/core/java/com/android/server/audio/AudioService.java
+@@ -5211,6 +5211,27 @@ public class AudioService extends IAudioService.Stub
+         mDeviceBroker.postBluetoothA2dpDeviceConfigChange(device);
+     }
+ 
++    /**
++     * @see AudioManager#handleBluetoothA2dpActiveDeviceChange(BluetoothDevice, int, int,
++     *                                                        boolean, int)
++     */
++    public void handleBluetoothA2dpActiveDeviceChange(
++            BluetoothDevice device, int state, int profile, boolean suppressNoisyIntent,
++            int a2dpVolume) {
++        if (device == null) {
++                throw new IllegalArgumentException("Illegal null device");
++        }
++        if (profile != BluetoothProfile.A2DP && profile != BluetoothProfile.A2DP_SINK) {
++            throw new IllegalArgumentException("invalid profile " + profile);
++        }
++        if (state != BluetoothProfile.STATE_CONNECTED
++                && state != BluetoothProfile.STATE_DISCONNECTED) {
++            throw new IllegalArgumentException("Invalid state " + state);
++        }
++        mDeviceBroker.postBluetoothA2dpDeviceConfigChangeExt(device, state, profile,
++                suppressNoisyIntent, a2dpVolume);
++    }
++
+     private static final Set<Integer> DEVICE_MEDIA_UNMUTED_ON_PLUG_SET;
+     static {
+         DEVICE_MEDIA_UNMUTED_ON_PLUG_SET = new HashSet<>();
+-- 
+2.28.0
+

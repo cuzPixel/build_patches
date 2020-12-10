@@ -1,0 +1,33 @@
+From 208e94380a24601fa4f34cc04cbfbe2fee54d369 Mon Sep 17 00:00:00 2001
+From: Jiyong Park <jiyong@google.com>
+Date: Tue, 14 Aug 2018 20:15:39 +0900
+Subject: [PATCH 04/11] Fix build error
+
+android.support.* are renamed to androidx.
+
+Test: m -j Settings
+Change-Id: I6048ba8b014d2804c624113bd214f10ddee8c13a
+---
+ .../connecteddevice/SavedTwsDeviceGroupController.java      | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/src/com/android/settings/connecteddevice/SavedTwsDeviceGroupController.java b/src/com/android/settings/connecteddevice/SavedTwsDeviceGroupController.java
+index f7ad20b..1e1f0ac 100644
+--- a/src/com/android/settings/connecteddevice/SavedTwsDeviceGroupController.java
++++ b/src/com/android/settings/connecteddevice/SavedTwsDeviceGroupController.java
+@@ -51,9 +51,9 @@ package com.android.settings.connecteddevice;
+ import android.content.pm.PackageManager;
+ import android.content.Context;
+ 
+-import android.support.v7.preference.Preference;
+-import android.support.v7.preference.PreferenceGroup;
+-import android.support.v7.preference.PreferenceScreen;
++import androidx.preference.Preference;
++import androidx.preference.PreferenceGroup;
++import androidx.preference.PreferenceScreen;
+ 
+ import com.android.settings.bluetooth.BluetoothDeviceUpdater;
+ import com.android.settings.bluetooth.SavedBluetoothTwsDeviceUpdater;
+-- 
+2.28.0
+

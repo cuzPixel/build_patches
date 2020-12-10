@@ -1,0 +1,32 @@
+From f9a145c9696d5949a94bb4e365cfc79bd4d9250e Mon Sep 17 00:00:00 2001
+From: Naval saini <saini@codeaurora.org>
+Date: Thu, 1 Aug 2019 19:42:31 +0530
+Subject: [PATCH 30/38] Enable codec change request when mode changes in
+ aptX-adaptive
+
+Enable codec change request when mode changes in aptX-adaptive
+
+CRs-Fixed: 2537521
+Change-Id: I74c8446a2a163282fb8d6edc5b293410a1b5d7c5
+---
+ core/java/android/bluetooth/BluetoothCodecConfig.java | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/core/java/android/bluetooth/BluetoothCodecConfig.java b/core/java/android/bluetooth/BluetoothCodecConfig.java
+index fd2f0859..212f21c0 100644
+--- a/core/java/android/bluetooth/BluetoothCodecConfig.java
++++ b/core/java/android/bluetooth/BluetoothCodecConfig.java
+@@ -665,6 +665,10 @@ public final class BluetoothCodecConfig implements Parcelable {
+                 if (mCodecSpecific1 != other.mCodecSpecific1) {
+                     return false;
+                 }
++            case SOURCE_CODEC_TYPE_APTX_ADAPTIVE:
++                if (other.mCodecSpecific4 > 0) {
++                    return false;
++                }
+                 // fall through
+             default:
+                 return true;
+-- 
+2.28.0
+
