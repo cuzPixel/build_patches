@@ -1,7 +1,7 @@
-From 82223aa3ea518b84e34e42e0d8d15250ed889e8c Mon Sep 17 00:00:00 2001
+From f026af2537bb891e761981c943ed9ffd8b630d39 Mon Sep 17 00:00:00 2001
 From: raysenlau <raysen@live.cn>
 Date: Wed, 25 Nov 2020 09:44:26 +0800
-Subject: [PATCH 2/3] Revert "Reapply: 7bd195337e7428e2ca26845ef66cd170222f8dfb
+Subject: [PATCH 2/4] Revert "Reapply: 7bd195337e7428e2ca26845ef66cd170222f8dfb
  ("kernel: Add KERNEL_SUPPORTS_LLVM_TOOLS to permit building with LLVM Build
  Tools")"
 
@@ -11,7 +11,7 @@ This reverts commit 04a8f9d88b37eff9c85c009907e7021492549526.
  1 file changed, 2 insertions(+), 21 deletions(-)
 
 diff --git a/build/tasks/kernel.mk b/build/tasks/kernel.mk
-index 86a7ae9..d606612 100644
+index 2f54320..8afc2ef 100644
 --- a/build/tasks/kernel.mk
 +++ b/build/tasks/kernel.mk
 @@ -33,8 +33,6 @@
@@ -23,7 +23,7 @@ index 86a7ae9..d606612 100644
  #   BOARD_KERNEL_IMAGE_NAME            = Built image name
  #                                          for ARM use: zImage
  #                                          for ARM64 use: Image.gz
-@@ -191,23 +189,6 @@ ifeq ($(TARGET_KERNEL_CLANG_COMPILE),true)
+@@ -193,23 +191,6 @@ ifeq ($(TARGET_KERNEL_CLANG_COMPILE),true)
          # Use the default version of clang if TARGET_KERNEL_CLANG_VERSION hasn't been set by the device config
          KERNEL_CLANG_VERSION := $(LLVM_PREBUILTS_VERSION)
      endif
@@ -47,7 +47,7 @@ index 86a7ae9..d606612 100644
      TARGET_KERNEL_CLANG_PATH ?= $(BUILD_TOP)/prebuilts/clang/host/$(HOST_PREBUILT_TAG)/$(KERNEL_CLANG_VERSION)
      ifeq ($(KERNEL_ARCH),arm64)
          KERNEL_CLANG_TRIPLE ?= CLANG_TRIPLE=aarch64-linux-gnu-
-@@ -240,7 +221,7 @@ KERNEL_ADDITIONAL_CONFIG_OUT := $(KERNEL_OUT)/.additional_config
+@@ -242,7 +223,7 @@ KERNEL_ADDITIONAL_CONFIG_OUT := $(KERNEL_OUT)/.additional_config
  # $(1): output path (The value passed to O=)
  # $(2): target to build (eg. defconfig, modules, dtbo.img)
  define internal-make-kernel-target
@@ -56,7 +56,7 @@ index 86a7ae9..d606612 100644
  endef
  
  # Make a kernel target
-@@ -395,4 +376,4 @@ dtboimage: $(INSTALLED_DTBOIMAGE_TARGET)
+@@ -397,4 +378,4 @@ dtboimage: $(INSTALLED_DTBOIMAGE_TARGET)
  .PHONY: dtbimage
  dtbimage: $(INSTALLED_DTBIMAGE_TARGET)
  

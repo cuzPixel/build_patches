@@ -1,7 +1,8 @@
-From b4b58094562e01e05ac12ed0306c650c4638f5d7 Mon Sep 17 00:00:00 2001
+From cd45874fab62fa91ed3d517070bbe1514b536443 Mon Sep 17 00:00:00 2001
 From: raysenlau <raysen@live.cn>
 Date: Mon, 30 Nov 2020 09:12:49 +0800
-Subject: [PATCH] config: Setup soong namespaces for TARGET_USE_QTI_BT_STACK
+Subject: [PATCH 3/4] config: Setup soong namespaces for
+ TARGET_USE_QTI_BT_STACK
 
 To opt-in for QTI BT addons, enable TARGET_USE_QTI_BT_STACK in BoardConfig.mk
 
@@ -28,10 +29,10 @@ index 5233d20..aae022c 100644
 +    vendor/qcom/opensource/commonsys/system/bt/conf
 +endif #TARGET_USE_QTI_BT_STACK
 diff --git a/config/BoardConfigSoong.mk b/config/BoardConfigSoong.mk
-index ecfd5dd..c7aba7d 100644
+index 829c2b1..a3ce73f 100644
 --- a/config/BoardConfigSoong.mk
 +++ b/config/BoardConfigSoong.mk
-@@ -96,3 +96,7 @@ endif
+@@ -98,3 +98,7 @@ endif
  ifneq ($(filter $(UM_PLATFORMS),$(TARGET_BOARD_PLATFORM)),)
  SOONG_CONFIG_customQcomVars_qcom_soong_namespace := $(QCOM_SOONG_NAMESPACE)
  endif
