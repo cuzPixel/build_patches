@@ -1,7 +1,7 @@
-From 9e18022b149fe49c2463a1e9830a774bce5956e4 Mon Sep 17 00:00:00 2001
+From 4ac1cdba66f4f9d3b6c3e77269d47f54856253f6 Mon Sep 17 00:00:00 2001
 From: Kiran Kelageri <kirankelageri@codeaurora.org>
 Date: Wed, 4 Apr 2018 23:46:24 -0700
-Subject: [PATCH 02/11] Bluetooth: Create new catogory for earbuds
+Subject: [PATCH 02/12] Bluetooth: Create new catogory for earbuds
 
 Create new catagory for TWS devices such that
 only paired TWS devices will be populated under

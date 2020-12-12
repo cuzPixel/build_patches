@@ -1,7 +1,7 @@
-From 920a5d910e4490df95ea81d2cee95d5888a13dab Mon Sep 17 00:00:00 2001
+From b4cb0a130b3ba088a8471fc9352df1330e3eeda2 Mon Sep 17 00:00:00 2001
 From: Justin DeMartino <jjdemartino@google.com>
 Date: Thu, 16 Jan 2020 11:36:41 -0800
-Subject: [PATCH 09/11] Implement abstract method getPreferenceKey in
+Subject: [PATCH 09/12] Implement abstract method getPreferenceKey in
  SavedBluetoothTwsDeviceUpdater
 
 Bug:147819852

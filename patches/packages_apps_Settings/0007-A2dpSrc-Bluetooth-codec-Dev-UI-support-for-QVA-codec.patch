@@ -1,7 +1,7 @@
-From d6b513502066ec62582a813755193a51a3c16243 Mon Sep 17 00:00:00 2001
+From 38b590c5a5d557394b93b2f30a47ba96b1c90625 Mon Sep 17 00:00:00 2001
 From: Satheesh Kumar Pallemoni <spallemo@codeaurora.org>
 Date: Mon, 13 Apr 2020 20:18:09 +0530
-Subject: [PATCH 07/11] A2dpSrc: Bluetooth codec Dev-UI support for QVA codecs
+Subject: [PATCH 07/12] A2dpSrc: Bluetooth codec Dev-UI support for QVA codecs
 
 Added Bluetooth codec Dev-UI support for QVA codecs.
 

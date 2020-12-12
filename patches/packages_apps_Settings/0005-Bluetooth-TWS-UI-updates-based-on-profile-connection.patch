@@ -1,7 +1,7 @@
-From 274b96e8555d46c6a6c4b73bf05d704d8e8ebbbc Mon Sep 17 00:00:00 2001
+From e79ec2ffde1f45a0cd679ce20fc63edc2589e3c3 Mon Sep 17 00:00:00 2001
 From: Kiran Kelageri <kirankelageri@codeaurora.org>
 Date: Wed, 22 Aug 2018 18:35:31 -0700
-Subject: [PATCH 05/11] Bluetooth-TWS: UI updates based on profile connection.
+Subject: [PATCH 05/12] Bluetooth-TWS: UI updates based on profile connection.
 
 Changes are made as per aosp implementation for TWS,
 UI update is moved to profile connection states instead

@@ -1,7 +1,7 @@
-From 49a5f9e05d7e7b1e5b903b5eef6855e2a37d0cf5 Mon Sep 17 00:00:00 2001
+From f49ef87b79e203c369064f3e6a53d024a77a9813 Mon Sep 17 00:00:00 2001
 From: zhenchao <zhenchao@codeaurora.org>
 Date: Tue, 10 Sep 2019 19:18:17 +0800
-Subject: [PATCH 06/11] Bluetooth-TWS: UI updates based on Filter matched
+Subject: [PATCH 06/12] Bluetooth-TWS: UI updates based on Filter matched
 
 Change implementation of Saved Earbuds category as same as Previous Connected
 Devices category for legacy devices, onProfileConnectionStateChanged in

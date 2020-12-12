@@ -1,7 +1,7 @@
-From c8e499dce99f215bd55ceda0eb3c1d8162794a59 Mon Sep 17 00:00:00 2001
+From c84ea14eb8addc519a6a9e2c40bd76bc42374e4a Mon Sep 17 00:00:00 2001
 From: Satheesh Kumar Pallemoni <spallemo@codeaurora.org>
 Date: Wed, 8 Apr 2020 12:36:07 +0530
-Subject: [PATCH 11/11] A2dpSrc: DEV-UI support for Blutooth Audio codec.
+Subject: [PATCH 11/12] A2dpSrc: DEV-UI support for Blutooth Audio codec.
 
 Due to enhancements in the DEV-UI by AOSP, Blutooth Audio
 codec menu showing nothing in developer settings. Due to

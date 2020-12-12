@@ -1,7 +1,7 @@
-From a786072a9300338e6c2e8187fd660a1c367be479 Mon Sep 17 00:00:00 2001
+From 9ff25fef59f488704f1b1ee22a79e6cb2b7012f3 Mon Sep 17 00:00:00 2001
 From: Kiran Kelageri <kirankelageri@codeaurora.org>
 Date: Mon, 23 Jul 2018 17:17:46 -0700
-Subject: [PATCH 03/11] Bluetooth-TWS: Filter TWS devices
+Subject: [PATCH 03/12] Bluetooth-TWS: Filter TWS devices
 
 Added filter to display TWS devices only
 under saved earbuds category.

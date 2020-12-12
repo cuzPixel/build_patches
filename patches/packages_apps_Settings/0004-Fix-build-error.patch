@@ -1,7 +1,7 @@
-From 208e94380a24601fa4f34cc04cbfbe2fee54d369 Mon Sep 17 00:00:00 2001
+From 77fddf6e992a424a9a4d56e71be5a63a9ecbc968 Mon Sep 17 00:00:00 2001
 From: Jiyong Park <jiyong@google.com>
 Date: Tue, 14 Aug 2018 20:15:39 +0900
-Subject: [PATCH 04/11] Fix build error
+Subject: [PATCH 04/12] Fix build error
 
 android.support.* are renamed to androidx.
 

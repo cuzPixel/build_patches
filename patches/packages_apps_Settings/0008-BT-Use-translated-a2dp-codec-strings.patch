@@ -1,7 +1,7 @@
-From 0835442b9fd473cfea6e358a05937d15fa4a81e0 Mon Sep 17 00:00:00 2001
+From f29411916a7621d85f00360f14dac337021f4680 Mon Sep 17 00:00:00 2001
 From: dianlujitao <dianlujitao@lineageos.org>
 Date: Fri, 5 Jun 2020 22:44:39 +0800
-Subject: [PATCH 08/11] BT: Use translated a2dp codec strings
+Subject: [PATCH 08/12] BT: Use translated a2dp codec strings
 
 [wight554: adapted for android 11]
 
