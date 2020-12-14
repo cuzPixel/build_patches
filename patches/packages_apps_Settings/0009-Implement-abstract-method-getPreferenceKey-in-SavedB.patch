@@ -1,4 +1,4 @@
-From b4cb0a130b3ba088a8471fc9352df1330e3eeda2 Mon Sep 17 00:00:00 2001
+From 5148c54065a7cc13a75ee51f6e45ae96169d0d90 Mon Sep 17 00:00:00 2001
 From: Justin DeMartino <jjdemartino@google.com>
 Date: Thu, 16 Jan 2020 11:36:41 -0800
 Subject: [PATCH 09/12] Implement abstract method getPreferenceKey in
@@ -11,7 +11,7 @@ Change-Id: Ifb11cc864d52c36704346debf89523cdcf5ce536
  1 file changed, 7 insertions(+)
 
 diff --git a/src/com/android/settings/bluetooth/SavedBluetoothTwsDeviceUpdater.java b/src/com/android/settings/bluetooth/SavedBluetoothTwsDeviceUpdater.java
-index d1773a9..d9c3d21 100644
+index d1773a9a09..d9c3d217b4 100644
 --- a/src/com/android/settings/bluetooth/SavedBluetoothTwsDeviceUpdater.java
 +++ b/src/com/android/settings/bluetooth/SavedBluetoothTwsDeviceUpdater.java
 @@ -63,6 +63,8 @@ import com.android.settingslib.bluetooth.LocalBluetoothManager;

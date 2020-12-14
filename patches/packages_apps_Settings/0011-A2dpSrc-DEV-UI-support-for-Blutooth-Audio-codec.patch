@@ -1,4 +1,4 @@
-From c84ea14eb8addc519a6a9e2c40bd76bc42374e4a Mon Sep 17 00:00:00 2001
+From dbf058395a8b8a6cc477c1a77adfa14ff1556047 Mon Sep 17 00:00:00 2001
 From: Satheesh Kumar Pallemoni <spallemo@codeaurora.org>
 Date: Wed, 8 Apr 2020 12:36:07 +0530
 Subject: [PATCH 11/12] A2dpSrc: DEV-UI support for Blutooth Audio codec.
@@ -21,7 +21,7 @@ Change-Id: I849e340152be5043782fa8274636a534c147c8bb
  3 files changed, 22 insertions(+), 1 deletion(-)
 
 diff --git a/res/layout/bluetooth_audio_codec_dialog.xml b/res/layout/bluetooth_audio_codec_dialog.xml
-index 9636427..1fd9de8 100644
+index 9636427055..1fd9de8021 100644
 --- a/res/layout/bluetooth_audio_codec_dialog.xml
 +++ b/res/layout/bluetooth_audio_codec_dialog.xml
 @@ -51,9 +51,17 @@
@@ -43,10 +43,10 @@ index 9636427..1fd9de8 100644
  
          <include
 diff --git a/src/com/android/settings/development/bluetooth/AbstractBluetoothDialogPreferenceController.java b/src/com/android/settings/development/bluetooth/AbstractBluetoothDialogPreferenceController.java
-index 6bc9175..5e6b806 100644
+index d66b8d8dc8..c0143ba82a 100644
 --- a/src/com/android/settings/development/bluetooth/AbstractBluetoothDialogPreferenceController.java
 +++ b/src/com/android/settings/development/bluetooth/AbstractBluetoothDialogPreferenceController.java
-@@ -36,7 +36,9 @@ public abstract class AbstractBluetoothDialogPreferenceController extends
+@@ -38,7 +38,9 @@ public abstract class AbstractBluetoothDialogPreferenceController extends
  
      private static final String TAG = "AbstractBtDlgCtr";
  
@@ -57,7 +57,7 @@ index 6bc9175..5e6b806 100644
              BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX_HD,
              BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX,
              BluetoothCodecConfig.SOURCE_CODEC_TYPE_AAC,
-@@ -222,6 +224,7 @@ public abstract class AbstractBluetoothDialogPreferenceController extends
+@@ -224,6 +226,7 @@ public abstract class AbstractBluetoothDialogPreferenceController extends
              Log.d(TAG, "Unable to get highest codec. Configs are empty");
              return BluetoothCodecConfig.SOURCE_CODEC_TYPE_INVALID;
          }
@@ -66,7 +66,7 @@ index 6bc9175..5e6b806 100644
              for (int j = 0; j < configs.length; j++) {
                  if ((configs[j].getCodecType() == CODEC_TYPES[i])) {
 diff --git a/src/com/android/settings/development/bluetooth/BluetoothCodecDialogPreference.java b/src/com/android/settings/development/bluetooth/BluetoothCodecDialogPreference.java
-index 3f1d23c..7b1f386 100644
+index 3f1d23cf5b..7b1f38613d 100644
 --- a/src/com/android/settings/development/bluetooth/BluetoothCodecDialogPreference.java
 +++ b/src/com/android/settings/development/bluetooth/BluetoothCodecDialogPreference.java
 @@ -22,12 +22,16 @@ import android.widget.RadioGroup;

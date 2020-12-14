@@ -1,4 +1,4 @@
-From e79ec2ffde1f45a0cd679ce20fc63edc2589e3c3 Mon Sep 17 00:00:00 2001
+From 2cca2b0630e3890929853fb8ad6695dec77cf4b9 Mon Sep 17 00:00:00 2001
 From: Kiran Kelageri <kirankelageri@codeaurora.org>
 Date: Wed, 22 Aug 2018 18:35:31 -0700
 Subject: [PATCH 05/12] Bluetooth-TWS: UI updates based on profile connection.
@@ -14,7 +14,7 @@ Change-Id: I7074698b3c421822756c30a808da6cd02968bced
  1 file changed, 5 insertions(+), 3 deletions(-)
 
 diff --git a/src/com/android/settings/bluetooth/SavedBluetoothTwsDeviceUpdater.java b/src/com/android/settings/bluetooth/SavedBluetoothTwsDeviceUpdater.java
-index 8759e6f..4504318 100644
+index 8759e6f1d8..450431807b 100644
 --- a/src/com/android/settings/bluetooth/SavedBluetoothTwsDeviceUpdater.java
 +++ b/src/com/android/settings/bluetooth/SavedBluetoothTwsDeviceUpdater.java
 @@ -50,6 +50,7 @@ package com.android.settings.bluetooth;

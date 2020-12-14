@@ -1,4 +1,4 @@
-From f49ef87b79e203c369064f3e6a53d024a77a9813 Mon Sep 17 00:00:00 2001
+From 508ab579ee9f6791e1e197dc56d898a529fe2165 Mon Sep 17 00:00:00 2001
 From: zhenchao <zhenchao@codeaurora.org>
 Date: Tue, 10 Sep 2019 19:18:17 +0800
 Subject: [PATCH 06/12] Bluetooth-TWS: UI updates based on Filter matched
@@ -14,7 +14,7 @@ CRs-Fixed: 2524220
  1 file changed, 11 deletions(-)
 
 diff --git a/src/com/android/settings/bluetooth/SavedBluetoothTwsDeviceUpdater.java b/src/com/android/settings/bluetooth/SavedBluetoothTwsDeviceUpdater.java
-index 4504318..d1773a9 100644
+index 450431807b..d1773a9a09 100644
 --- a/src/com/android/settings/bluetooth/SavedBluetoothTwsDeviceUpdater.java
 +++ b/src/com/android/settings/bluetooth/SavedBluetoothTwsDeviceUpdater.java
 @@ -74,17 +74,6 @@ public class SavedBluetoothTwsDeviceUpdater extends BluetoothDeviceUpdater {

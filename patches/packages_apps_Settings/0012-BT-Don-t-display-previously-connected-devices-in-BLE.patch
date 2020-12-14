@@ -1,4 +1,4 @@
-From 610311ebd67be7e7943c9907462dc9ad8a261ee8 Mon Sep 17 00:00:00 2001
+From d72f31fe430bde6e64607337570038b11b464bac Mon Sep 17 00:00:00 2001
 From: Venkata Jagadeesh Garaga <vgaraga@codeaurora.org>
 Date: Fri, 5 Apr 2019 17:38:18 +0530
 Subject: [PATCH 12/12] BT: Don't display previously connected devices in
@@ -19,7 +19,7 @@ Change-Id: I11df81819d0be0d3f7d7598b53057afcb5245901
  1 file changed, 45 insertions(+), 1 deletion(-)
 
 diff --git a/src/com/android/settings/connecteddevice/PreviouslyConnectedDevicePreferenceController.java b/src/com/android/settings/connecteddevice/PreviouslyConnectedDevicePreferenceController.java
-index 438a381..c9d9f8e 100644
+index 438a3815f9..c9d9f8ed98 100644
 --- a/src/com/android/settings/connecteddevice/PreviouslyConnectedDevicePreferenceController.java
 +++ b/src/com/android/settings/connecteddevice/PreviouslyConnectedDevicePreferenceController.java
 @@ -31,6 +31,9 @@ import androidx.preference.PreferenceScreen;

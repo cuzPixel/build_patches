@@ -1,4 +1,4 @@
-From f29411916a7621d85f00360f14dac337021f4680 Mon Sep 17 00:00:00 2001
+From ca528f101bc898f531c50550c01d9fea8536cdb2 Mon Sep 17 00:00:00 2001
 From: dianlujitao <dianlujitao@lineageos.org>
 Date: Fri, 5 Jun 2020 22:44:39 +0800
 Subject: [PATCH 08/12] BT: Use translated a2dp codec strings
@@ -12,7 +12,7 @@ Signed-off-by: Volodymyr Zhdanov <wight554@gmail.com>
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/src/com/android/settings/development/bluetooth/BluetoothCodecDialogPreference.java b/src/com/android/settings/development/bluetooth/BluetoothCodecDialogPreference.java
-index 6a733f3..3f1d23c 100644
+index 6a733f3fba..3f1d23cf5b 100644
 --- a/src/com/android/settings/development/bluetooth/BluetoothCodecDialogPreference.java
 +++ b/src/com/android/settings/development/bluetooth/BluetoothCodecDialogPreference.java
 @@ -62,11 +62,11 @@ public class BluetoothCodecDialogPreference extends BaseBluetoothDialogPreferenc

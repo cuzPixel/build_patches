@@ -1,4 +1,4 @@
-From 77fddf6e992a424a9a4d56e71be5a63a9ecbc968 Mon Sep 17 00:00:00 2001
+From efba697686679c6a6a6af8a6824d5bd26acc262c Mon Sep 17 00:00:00 2001
 From: Jiyong Park <jiyong@google.com>
 Date: Tue, 14 Aug 2018 20:15:39 +0900
 Subject: [PATCH 04/12] Fix build error
@@ -12,7 +12,7 @@ Change-Id: I6048ba8b014d2804c624113bd214f10ddee8c13a
  1 file changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/src/com/android/settings/connecteddevice/SavedTwsDeviceGroupController.java b/src/com/android/settings/connecteddevice/SavedTwsDeviceGroupController.java
-index f7ad20b..1e1f0ac 100644
+index f7ad20b571..1e1f0ac3ee 100644
 --- a/src/com/android/settings/connecteddevice/SavedTwsDeviceGroupController.java
 +++ b/src/com/android/settings/connecteddevice/SavedTwsDeviceGroupController.java
 @@ -51,9 +51,9 @@ package com.android.settings.connecteddevice;

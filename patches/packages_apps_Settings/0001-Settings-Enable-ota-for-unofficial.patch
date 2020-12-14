@@ -1,4 +1,4 @@
-From 1ba1610517b29a0f0d4c934e068cb493d851dd4d Mon Sep 17 00:00:00 2001
+From e4ecdb47902d027c9c26e0b34000700ace989bca Mon Sep 17 00:00:00 2001
 From: raysenlau <raysen@live.cn>
 Date: Wed, 5 Aug 2020 14:10:33 +0800
 Subject: [PATCH 01/12] Settings: Enable ota for unofficial
@@ -9,7 +9,7 @@ Change-Id: I8c24825be57028f80bcf7b683145e8e9d9b952c6
  1 file changed, 4 insertions(+), 14 deletions(-)
 
 diff --git a/src/com/android/settings/system/SystemUpdatePreferenceController.java b/src/com/android/settings/system/SystemUpdatePreferenceController.java
-index 8db9722..400d1c7 100644
+index 8db9722388..400d1c73c9 100644
 --- a/src/com/android/settings/system/SystemUpdatePreferenceController.java
 +++ b/src/com/android/settings/system/SystemUpdatePreferenceController.java
 @@ -34,9 +34,6 @@ public class SystemUpdatePreferenceController extends BasePreferenceController {

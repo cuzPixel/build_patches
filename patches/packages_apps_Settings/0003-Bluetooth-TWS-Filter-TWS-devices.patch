@@ -1,4 +1,4 @@
-From 9ff25fef59f488704f1b1ee22a79e6cb2b7012f3 Mon Sep 17 00:00:00 2001
+From 794213d3cce28676d18d3b73974c9bea203488ef Mon Sep 17 00:00:00 2001
 From: Kiran Kelageri <kirankelageri@codeaurora.org>
 Date: Mon, 23 Jul 2018 17:17:46 -0700
 Subject: [PATCH 03/12] Bluetooth-TWS: Filter TWS devices
@@ -13,7 +13,7 @@ Change-Id: Id254210a4a308360e0f2110d6b81d8a3a780bd38
  1 file changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/src/com/android/settings/bluetooth/SavedBluetoothTwsDeviceUpdater.java b/src/com/android/settings/bluetooth/SavedBluetoothTwsDeviceUpdater.java
-index 55505d0..8759e6f 100644
+index 55505d078f..8759e6f1d8 100644
 --- a/src/com/android/settings/bluetooth/SavedBluetoothTwsDeviceUpdater.java
 +++ b/src/com/android/settings/bluetooth/SavedBluetoothTwsDeviceUpdater.java
 @@ -75,9 +75,10 @@ public class SavedBluetoothTwsDeviceUpdater extends BluetoothDeviceUpdater {
