@@ -1,0 +1,35 @@
+From 7af11ffbaa72d8e487a39bc12d4380675a789ebc Mon Sep 17 00:00:00 2001
+From: raysenlau <raysen@live.cn>
+Date: Thu, 24 Dec 2020 16:03:44 +0800
+Subject: [PATCH] Revert "Automatically set CCACHE_EXEC to the system's ccache"
+
+This reverts commit d126dd81d81e8e74635d8d9d9aac52e7b74194b4.
+---
+ envsetup.sh | 11 -----------
+ 1 file changed, 11 deletions(-)
+
+diff --git a/envsetup.sh b/envsetup.sh
+index 46972f377..9446fe481 100644
+--- a/envsetup.sh
++++ b/envsetup.sh
+@@ -1671,17 +1671,6 @@ validate_current_shell
+ source_vendorsetup
+ addcompletions
+ 
+-# check and set ccache path on envsetup
+-if [ -z ${CCACHE_EXEC} ]; then
+-    ccache_path=$(which ccache)
+-    if [ ! -z "$ccache_path" ]; then
+-        export CCACHE_EXEC="$ccache_path"
+-        echo "ccache found and CCACHE_EXEC has been set to : $ccache_path"
+-    else
+-        echo "ccache not found/installed!"
+-    fi
+-fi
+-
+ export ANDROID_BUILD_TOP=$(gettop)
+ 
+ . $ANDROID_BUILD_TOP/vendor/aosp/build/envsetup.sh
+-- 
+2.28.0
+
