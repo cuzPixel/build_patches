@@ -1,0 +1,62 @@
+From c1d1bb359797a924de868a14f8bd09c8247de6df Mon Sep 17 00:00:00 2001
+From: raysenlau <raysen@live.cn>
+Date: Mon, 4 Jan 2021 11:26:38 +0800
+Subject: [PATCH] Drop vendorsetup
+
+Change-Id: Ifbfa2faf508c158b575d0235a779fc0637960df3
+---
+ tools/get_official_devices.py | 26 --------------------------
+ vendorsetup.sh                |  7 -------
+ 2 files changed, 33 deletions(-)
+ delete mode 100755 tools/get_official_devices.py
+ delete mode 100755 vendorsetup.sh
+
+diff --git a/tools/get_official_devices.py b/tools/get_official_devices.py
+deleted file mode 100755
+index 9d94daa..0000000
+--- a/tools/get_official_devices.py
++++ /dev/null
+@@ -1,26 +0,0 @@
+-import json
+-try:
+-    # For python3
+-    import urllib.error
+-    import urllib.parse
+-    import urllib.request
+-except:
+-    # For python2
+-    import imp
+-    import urllib2
+-    import urlparse
+-    urllib = imp.new_module('urllib')
+-    urllib.error = urllib2
+-    urllib.parse = urlparse
+-    urllib.request = urllib2
+-try:
+-    url = "https://raw.githubusercontent.com/PixelExperience/official_devices/master/devices.json"
+-    response = urllib.request.urlopen(url)
+-    data = json.loads(response.read())
+-    for res in data:
+-        for version in res['supported_versions']:
+-            if version['version_code'] == 'eleven':
+-                print (res['codename'])
+-                break
+-except:
+-    print ("")
+diff --git a/vendorsetup.sh b/vendorsetup.sh
+deleted file mode 100755
+index ae031b0..0000000
+--- a/vendorsetup.sh
++++ /dev/null
+@@ -1,7 +0,0 @@
+-lunch_others_targets=()
+-for device in $(python vendor/aosp/tools/get_official_devices.py)
+-do
+-    for var in user userdebug eng; do
+-        lunch_others_targets+=("aosp_$device-$var")
+-    done
+-done
+\ No newline at end of file
+-- 
+2.28.0
+
