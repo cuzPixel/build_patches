@@ -1,0 +1,27 @@
+From 48f45f1e123c698b816f755e2e42245bdcc7f2c1 Mon Sep 17 00:00:00 2001
+From: sbwml <admin@sbwml.net>
+Date: Thu, 7 Jan 2021 12:34:37 +0800
+Subject: [PATCH] Allow flipendo access to PowerHal service
+
+Change-Id: I235857b34f632c95a72085e4d72da99126c504ef
+---
+ common/private/flipendo.te | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/common/private/flipendo.te b/common/private/flipendo.te
+index aaa0822..8bf8a03 100644
+--- a/common/private/flipendo.te
++++ b/common/private/flipendo.te
+@@ -25,4 +25,7 @@ allow flipendo fwk_stats_hwservice:hwservice_manager find;
+ allow flipendo color_display_service:service_manager find;
+ 
+ # Allow flipendo to find hal_power_service
+-allow flipendo hal_power_service:service_manager find;
+\ No newline at end of file
++allow flipendo hal_power_service:service_manager find;
++
++# Access to PowerHal service
++hal_client_domain(flipendo, hal_power);
+-- 
+2.28.0
+
