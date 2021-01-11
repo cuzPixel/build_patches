@@ -1,7 +1,7 @@
-From c1d1bb359797a924de868a14f8bd09c8247de6df Mon Sep 17 00:00:00 2001
+From 7afccd34431a258a9cd099706a31df30b7f8f1e9 Mon Sep 17 00:00:00 2001
 From: raysenlau <raysen@live.cn>
 Date: Mon, 4 Jan 2021 11:26:38 +0800
-Subject: [PATCH] Drop vendorsetup
+Subject: [PATCH 4/4] Drop vendorsetup
 
 Change-Id: Ifbfa2faf508c158b575d0235a779fc0637960df3
 ---

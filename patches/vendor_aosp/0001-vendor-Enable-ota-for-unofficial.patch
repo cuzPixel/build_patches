@@ -1,4 +1,4 @@
-From 90903ea16078621409600831a11dd0d50c6c0554 Mon Sep 17 00:00:00 2001
+From e0c5d098fb0f79a68cea71d55a3bbeb90181691a Mon Sep 17 00:00:00 2001
 From: raysenlau <raysen@live.cn>
 Date: Wed, 5 Aug 2020 14:12:03 +0800
 Subject: [PATCH 1/4] vendor: Enable ota for unofficial

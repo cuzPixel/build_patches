@@ -1,7 +1,7 @@
-From 451aa2106e55c160430af057f16a86ad981c2df0 Mon Sep 17 00:00:00 2001
+From 4dcc4f7d4d4c56d516cf8a7e4b91f7fcfc4a7de6 Mon Sep 17 00:00:00 2001
 From: raysenlau <raysen@live.cn>
 Date: Fri, 11 Dec 2020 10:07:43 +0800
-Subject: [PATCH 4/4] Use our custom version
+Subject: [PATCH 3/4] Use our custom version
 
 Change-Id: I3216e7b56acb2c3f39ea4e60eabb67b081a3923d
 ---
