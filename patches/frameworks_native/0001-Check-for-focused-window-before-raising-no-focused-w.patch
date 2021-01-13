@@ -1,0 +1,208 @@
+From 4cf17cebe59213eb0f9c6f01065796431d05f0bb Mon Sep 17 00:00:00 2001
+From: Siarhei Vishniakou <svv@google.com>
+Date: Tue, 8 Sep 2020 19:43:33 -0500
+Subject: [PATCH 1/2] Check for focused window before raising 'no focused
+ window' ANR
+
+Previously, we were relying on the dispatcher trying to send a focused
+event prior to raising ANR due to no focused window.
+
+So, the previous expected behavior was:
+1. A key comes in, and there is no focused window
+2. ANR timer starts
+3. Focused window appears
+4. We try to dispatch the key again, and realize there's a focused
+window
+5. We stop the ANR timer
+
+However, there are cases when the pending key event gets dropped. For
+example, this could happen if the user touches another application. That
+would lead to the following sequence of events:
+1. A key comes in, and there is no focused window
+2. ANR timer starts
+3. User touches another application, and the pending key gets dropped
+4. Focused window appears
+5. We don't try to dispatch the pending key anymore (since nothing is
+pending)
+6. We raise the "no focused window" ANR, even though we have a focused
+window (and don't even have a focused event to dispatch anymore).
+
+Solution: always check for focused window presence before raising the
+"no focused window" ANR. This way, we will no longer rely on other events
+happening for this ANR to be functioning correctly.
+
+Bug: 164754075
+Bug: 167780081
+Test: atest inputflinger_tests
+Change-Id: I70162d507fa7d65132c83fcba96ad9931e373647
+Merged-In: I70162d507fa7d65132c83fcba96ad9931e373647
+---
+ .../dispatcher/InputDispatcher.cpp            | 35 ++++++++++-
+ .../inputflinger/dispatcher/InputDispatcher.h |  6 ++
+ .../tests/InputDispatcher_test.cpp            | 60 +++++++++++++++++++
+ 3 files changed, 100 insertions(+), 1 deletion(-)
+
+diff --git a/services/inputflinger/dispatcher/InputDispatcher.cpp b/services/inputflinger/dispatcher/InputDispatcher.cpp
+index fe016af..daa3350 100644
+--- a/services/inputflinger/dispatcher/InputDispatcher.cpp
++++ b/services/inputflinger/dispatcher/InputDispatcher.cpp
+@@ -481,6 +481,33 @@ void InputDispatcher::dispatchOnce() {
+     mLooper->pollOnce(timeoutMillis);
+ }
+ 
++/**
++ * Raise ANR if there is no focused window.
++ * Before the ANR is raised, do a final state check:
++ * 1. The currently focused application must be the same one we are waiting for.
++ * 2. Ensure we still don't have a focused window.
++ */
++void InputDispatcher::processNoFocusedWindowAnrLocked() {
++    // Check if the application that we are waiting for is still focused.
++    sp<InputApplicationHandle> focusedApplication =
++            getValueByKey(mFocusedApplicationHandlesByDisplay, mAwaitedApplicationDisplayId);
++    if (focusedApplication == nullptr ||
++        focusedApplication->getApplicationToken() !=
++                mAwaitedFocusedApplication->getApplicationToken()) {
++        // Unexpected because we should have reset the ANR timer when focused application changed
++        ALOGE("Waited for a focused window, but focused application has already changed to %s",
++              focusedApplication->getName().c_str());
++        return; // The focused application has changed.
++    }
++
++    const sp<InputWindowHandle>& focusedWindowHandle =
++            getFocusedWindowHandleLocked(mAwaitedApplicationDisplayId);
++    if (focusedWindowHandle != nullptr) {
++        return; // We now have a focused window. No need for ANR.
++    }
++    onAnrLocked(mAwaitedFocusedApplication);
++}
++
+ /**
+  * Check if any of the connections' wait queues have events that are too old.
+  * If we waited for events to be ack'ed for more than the window timeout, raise an ANR.
+@@ -492,8 +519,9 @@ nsecs_t InputDispatcher::processAnrsLocked() {
+     // Check if we are waiting for a focused window to appear. Raise ANR if waited too long
+     if (mNoFocusedWindowTimeoutTime.has_value() && mAwaitedFocusedApplication != nullptr) {
+         if (currentTime >= *mNoFocusedWindowTimeoutTime) {
+-            onAnrLocked(mAwaitedFocusedApplication);
++            processNoFocusedWindowAnrLocked();
+             mAwaitedFocusedApplication.clear();
++            mNoFocusedWindowTimeoutTime = std::nullopt;
+             return LONG_LONG_MIN;
+         } else {
+             // Keep waiting
+@@ -1477,6 +1505,7 @@ int32_t InputDispatcher::findFocusedWindowTargetsLocked(nsecs_t currentTime,
+                     DEFAULT_INPUT_DISPATCHING_TIMEOUT.count());
+             mNoFocusedWindowTimeoutTime = currentTime + timeout;
+             mAwaitedFocusedApplication = focusedApplicationHandle;
++            mAwaitedApplicationDisplayId = displayId;
+             ALOGW("Waiting because no window has focus but %s may eventually add a "
+                   "window when it finishes starting up. Will wait for %" PRId64 "ms",
+                   mAwaitedFocusedApplication->getName().c_str(), ns2ms(timeout));
+@@ -3567,6 +3596,10 @@ std::vector<sp<InputWindowHandle>> InputDispatcher::getWindowHandlesLocked(
+     return getValueByKey(mWindowHandlesByDisplay, displayId);
+ }
+ 
++sp<InputWindowHandle> InputDispatcher::getFocusedWindowHandleLocked(int displayId) const {
++    return getValueByKey(mFocusedWindowHandlesByDisplay, displayId);
++}
++
+ sp<InputWindowHandle> InputDispatcher::getWindowHandleLocked(
+         const sp<IBinder>& windowHandleToken) const {
+     if (windowHandleToken == nullptr) {
+diff --git a/services/inputflinger/dispatcher/InputDispatcher.h b/services/inputflinger/dispatcher/InputDispatcher.h
+index e679c6b..23d7e01 100644
+--- a/services/inputflinger/dispatcher/InputDispatcher.h
++++ b/services/inputflinger/dispatcher/InputDispatcher.h
+@@ -300,6 +300,7 @@ private:
+             REQUIRES(mLock);
+     sp<InputWindowHandle> getWindowHandleLocked(const sp<IBinder>& windowHandleToken) const
+             REQUIRES(mLock);
++    sp<InputWindowHandle> getFocusedWindowHandleLocked(int displayId) const REQUIRES(mLock);
+     sp<InputChannel> getInputChannelLocked(const sp<IBinder>& windowToken) const REQUIRES(mLock);
+     bool hasWindowHandleLocked(const sp<InputWindowHandle>& windowHandle) const REQUIRES(mLock);
+ 
+@@ -366,6 +367,11 @@ private:
+      * Used to raise an ANR when we have no focused window.
+      */
+     sp<InputApplicationHandle> mAwaitedFocusedApplication GUARDED_BY(mLock);
++    /**
++     * The displayId that the focused application is associated with.
++     */
++    int32_t mAwaitedApplicationDisplayId GUARDED_BY(mLock);
++    void processNoFocusedWindowAnrLocked() REQUIRES(mLock);
+ 
+     // Optimization: AnrTracker is used to quickly find which connection is due for a timeout next.
+     // AnrTracker must be kept in-sync with all responsive connection.waitQueues.
+diff --git a/services/inputflinger/tests/InputDispatcher_test.cpp b/services/inputflinger/tests/InputDispatcher_test.cpp
+index 1a133dc..310b6de 100644
+--- a/services/inputflinger/tests/InputDispatcher_test.cpp
++++ b/services/inputflinger/tests/InputDispatcher_test.cpp
+@@ -3031,4 +3031,64 @@ TEST_F(InputDispatcherMultiWindowAnr, SplitTouch_SingleWindowAnr) {
+     mFocusedWindow->assertNoEvents();
+ }
+ 
++/**
++ * If we have no focused window, and a key comes in, we start the ANR timer.
++ * The focused application should add a focused window before the timer runs out to prevent ANR.
++ *
++ * If the user touches another application during this time, the key should be dropped.
++ * Next, if a new focused window comes in, without toggling the focused application,
++ * then no ANR should occur.
++ *
++ * Normally, we would expect the new focused window to be accompanied by 'setFocusedApplication',
++ * but in some cases the policy may not update the focused application.
++ */
++TEST_F(InputDispatcherMultiWindowAnr, FocusedWindowWithoutSetFocusedApplication_NoAnr) {
++    sp<FakeApplicationHandle> focusedApplication = new FakeApplicationHandle();
++    focusedApplication->setDispatchingTimeout(60ms);
++    mDispatcher->setFocusedApplication(ADISPLAY_ID_DEFAULT, focusedApplication);
++    // The application that owns 'mFocusedWindow' and 'mUnfocusedWindow' is not focused.
++    mFocusedWindow->setFocus(false);
++
++    mDispatcher->setInputWindows({{ADISPLAY_ID_DEFAULT, {mFocusedWindow, mUnfocusedWindow}}});
++    mFocusedWindow->consumeFocusEvent(false);
++
++    // Send a key. The ANR timer should start because there is no focused window.
++    // 'focusedApplication' will get blamed if this timer completes.
++    // Key will not be sent anywhere because we have no focused window. It will remain pending.
++    int32_t result =
++            injectKey(mDispatcher, AKEY_EVENT_ACTION_DOWN, 0 /*repeatCount*/, ADISPLAY_ID_DEFAULT,
++                      INPUT_EVENT_INJECTION_SYNC_NONE, 10ms /*injectionTimeout*/);
++    ASSERT_EQ(INPUT_EVENT_INJECTION_SUCCEEDED, result);
++
++    // Wait until dispatcher starts the "no focused window" timer. If we don't wait here,
++    // then the injected touches won't cause the focused event to get dropped.
++    // The dispatcher only checks for whether the queue should be pruned upon queueing.
++    // If we inject the touch right away and the ANR timer hasn't started, the touch event would
++    // simply be added to the queue without 'shouldPruneInboundQueueLocked' returning 'true'.
++    // For this test, it means that the key would get delivered to the window once it becomes
++    // focused.
++    std::this_thread::sleep_for(10ms);
++
++    // Touch unfocused window. This should force the pending key to get dropped.
++    NotifyMotionArgs motionArgs =
++            generateMotionArgs(AMOTION_EVENT_ACTION_DOWN, AINPUT_SOURCE_TOUCHSCREEN,
++                               ADISPLAY_ID_DEFAULT, {UNFOCUSED_WINDOW_LOCATION});
++    mDispatcher->notifyMotion(&motionArgs);
++
++    // We do not consume the motion right away, because that would require dispatcher to first
++    // process (== drop) the key event, and by that time, ANR will be raised.
++    // Set the focused window first.
++    mFocusedWindow->setFocus(true);
++    mDispatcher->setInputWindows({{ADISPLAY_ID_DEFAULT, {mFocusedWindow, mUnfocusedWindow}}});
++    mFocusedWindow->consumeFocusEvent(true);
++    // We do not call "setFocusedApplication" here, even though the newly focused window belongs
++    // to another application. This could be a bug / behaviour in the policy.
++
++    mUnfocusedWindow->consumeMotionDown();
++
++    ASSERT_TRUE(mDispatcher->waitForIdle());
++    // Should not ANR because we actually have a focused window. It was just added too slowly.
++    ASSERT_NO_FATAL_FAILURE(mFakePolicy->assertNotifyAnrWasNotCalled());
++}
++
+ } // namespace android::inputdispatcher
+-- 
+2.28.0
+
