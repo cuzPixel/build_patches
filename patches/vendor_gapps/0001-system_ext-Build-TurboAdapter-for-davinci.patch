@@ -1,0 +1,25 @@
+From 812db19a484e3aeeaeaf1d283776e264e8525b7a Mon Sep 17 00:00:00 2001
+From: raysenlau <raysen@live.cn>
+Date: Mon, 25 Jan 2021 12:51:21 +0800
+Subject: [PATCH] system_ext: Build TurboAdapter for davinci
+
+---
+ system_ext/packages/privileged_apps/TurboAdapter/Android.mk | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/system_ext/packages/privileged_apps/TurboAdapter/Android.mk b/system_ext/packages/privileged_apps/TurboAdapter/Android.mk
+index 4b15d7b..5d1805e 100644
+--- a/system_ext/packages/privileged_apps/TurboAdapter/Android.mk
++++ b/system_ext/packages/privileged_apps/TurboAdapter/Android.mk
+@@ -18,7 +18,7 @@
+ 
+ LOCAL_PATH := $(call my-dir)
+ 
+-ifneq ($(filter walleye taimen blueline crosshatch bonito sargo flame coral sunfish bramble redfin, $(TARGET_DEVICE)),)
++ifneq ($(filter davinci walleye taimen blueline crosshatch bonito sargo flame coral sunfish bramble redfin, $(TARGET_DEVICE)),)
+ 
+ include $(CLEAR_VARS)
+ LOCAL_MODULE := TurboAdapter
+-- 
+2.25.1
+
