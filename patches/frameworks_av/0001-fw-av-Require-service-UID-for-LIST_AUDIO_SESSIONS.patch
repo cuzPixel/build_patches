@@ -1,0 +1,29 @@
+From fc0a7b397e1b87d60421a1ed6f29d66e1d03db9c Mon Sep 17 00:00:00 2001
+From: Michael W <baddaemon87@gmail.com>
+Date: Tue, 26 Jan 2021 12:59:44 +0800
+Subject: [PATCH] fw/av: Require service UID for LIST_AUDIO_SESSIONS
+
+* Should prevent an information disclosure
+
+Change-Id: I83e1dc2d175c37fdc6057c2ddca94ad4d7d5b6c4
+---
+ media/libaudioclient/IAudioPolicyService.cpp | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/media/libaudioclient/IAudioPolicyService.cpp b/media/libaudioclient/IAudioPolicyService.cpp
+index 60af84b..0ba671e 100644
+--- a/media/libaudioclient/IAudioPolicyService.cpp
++++ b/media/libaudioclient/IAudioPolicyService.cpp
+@@ -1569,7 +1569,8 @@ status_t BnAudioPolicyService::onTransact(
+         case SET_ALLOWED_CAPTURE_POLICY:
+         case AUDIO_MODULES_UPDATED:
+         case SET_CURRENT_IME_UID:
+-        case REGISTER_SOUNDTRIGGER_CAPTURE_STATE_LISTENER: {
++        case REGISTER_SOUNDTRIGGER_CAPTURE_STATE_LISTENER:
++        case LIST_AUDIO_SESSIONS: {
+             if (!isServiceUid(IPCThreadState::self()->getCallingUid())) {
+                 ALOGW("%s: transaction %d received from PID %d unauthorized UID %d",
+                       __func__, code, IPCThreadState::self()->getCallingPid(),
+-- 
+2.28.0
+

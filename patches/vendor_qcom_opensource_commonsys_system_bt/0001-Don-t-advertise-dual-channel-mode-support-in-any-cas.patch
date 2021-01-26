@@ -1,0 +1,149 @@
+From f75d3ab180b1d7e34650b848ec10f1975d010553 Mon Sep 17 00:00:00 2001
+From: Bruno Martins <bgcngm@gmail.com>
+Date: Wed, 13 Jan 2021 23:54:49 +0000
+Subject: [PATCH] Don't advertise dual channel mode support in any case
+
+Although SBC Dual Channel (SBC HD audio) works fine with the AOSP BT stack,
+it fails to do so with this QTI BT stack. The following error appears
+when dual channel mode is selected and no audio is played:
+
+ I btaudio_offload_qti: audio_check_a2dp_ready_qti: state = AUDIO_A2DP_STATE_STANDBY
+ E audio_hw_primary: start_output_stream: A2DP profile is not ready, return error
+
+In order to avoid bug reports from users, simply disable
+dual channel mode in all cases. The setting will be greyed-out,
+meaning not supported by the device.
+
+Change-Id: Id42c56e8557ddf24d5125da535fd567ec4bc9666
+---
+ stack/a2dp/a2dp_aac.cc                  | 2 ++
+ stack/a2dp/a2dp_sbc.cc                  | 2 ++
+ stack/a2dp/a2dp_vendor_aptx.cc          | 2 ++
+ stack/a2dp/a2dp_vendor_aptx_adaptive.cc | 2 ++
+ stack/a2dp/a2dp_vendor_aptx_hd.cc       | 2 ++
+ stack/a2dp/a2dp_vendor_ldac.cc          | 2 ++
+ 6 files changed, 12 insertions(+)
+
+diff --git a/stack/a2dp/a2dp_aac.cc b/stack/a2dp/a2dp_aac.cc
+index 25403c5..9ecb516 100644
+--- a/stack/a2dp/a2dp_aac.cc
++++ b/stack/a2dp/a2dp_aac.cc
+@@ -1067,6 +1067,7 @@ static bool select_audio_channel_mode(
+         return true;
+       }
+       break;
++    case BTAV_A2DP_CODEC_CHANNEL_MODE_DUAL_CHANNEL:
+     case BTAV_A2DP_CODEC_CHANNEL_MODE_NONE:
+       break;
+   }
+@@ -1338,6 +1339,7 @@ bool A2dpCodecConfigAac::setCodecConfig(const uint8_t* p_peer_codec_info,
+         codec_config_.channel_mode = codec_user_config_.channel_mode;
+       }
+       break;
++    case BTAV_A2DP_CODEC_CHANNEL_MODE_DUAL_CHANNEL:
+     case BTAV_A2DP_CODEC_CHANNEL_MODE_NONE:
+       codec_capability_.channel_mode = BTAV_A2DP_CODEC_CHANNEL_MODE_NONE;
+       codec_config_.channel_mode = BTAV_A2DP_CODEC_CHANNEL_MODE_NONE;
+diff --git a/stack/a2dp/a2dp_sbc.cc b/stack/a2dp/a2dp_sbc.cc
+index 9a2d09e..9d61727 100644
+--- a/stack/a2dp/a2dp_sbc.cc
++++ b/stack/a2dp/a2dp_sbc.cc
+@@ -1266,6 +1266,7 @@ static bool select_audio_channel_mode(
+         return true;
+       }
+       break;
++    case BTAV_A2DP_CODEC_CHANNEL_MODE_DUAL_CHANNEL:
+     case BTAV_A2DP_CODEC_CHANNEL_MODE_NONE:
+       break;
+   }
+@@ -1485,6 +1486,7 @@ bool A2dpCodecConfigSbc::setCodecConfig(const uint8_t* p_peer_codec_info,
+         break;
+       }
+       break;
++    case BTAV_A2DP_CODEC_CHANNEL_MODE_DUAL_CHANNEL:
+     case BTAV_A2DP_CODEC_CHANNEL_MODE_NONE:
+       codec_capability_.channel_mode = BTAV_A2DP_CODEC_CHANNEL_MODE_NONE;
+       codec_config_.channel_mode = BTAV_A2DP_CODEC_CHANNEL_MODE_NONE;
+diff --git a/stack/a2dp/a2dp_vendor_aptx.cc b/stack/a2dp/a2dp_vendor_aptx.cc
+index 595eaf1..a26c926 100644
+--- a/stack/a2dp/a2dp_vendor_aptx.cc
++++ b/stack/a2dp/a2dp_vendor_aptx.cc
+@@ -615,6 +615,7 @@ static bool select_audio_channel_mode(
+         return true;
+       }
+       break;
++    case BTAV_A2DP_CODEC_CHANNEL_MODE_DUAL_CHANNEL:
+     case BTAV_A2DP_CODEC_CHANNEL_MODE_NONE:
+       break;
+   }
+@@ -815,6 +816,7 @@ bool A2dpCodecConfigAptx::setCodecConfig(const uint8_t* p_peer_codec_info,
+         codec_config_.channel_mode = codec_user_config_.channel_mode;
+       }
+       break;
++    case BTAV_A2DP_CODEC_CHANNEL_MODE_DUAL_CHANNEL:
+     case BTAV_A2DP_CODEC_CHANNEL_MODE_NONE:
+       codec_capability_.channel_mode = BTAV_A2DP_CODEC_CHANNEL_MODE_NONE;
+       codec_config_.channel_mode = BTAV_A2DP_CODEC_CHANNEL_MODE_NONE;
+diff --git a/stack/a2dp/a2dp_vendor_aptx_adaptive.cc b/stack/a2dp/a2dp_vendor_aptx_adaptive.cc
+index 4c75273..6ac0c17 100644
+--- a/stack/a2dp/a2dp_vendor_aptx_adaptive.cc
++++ b/stack/a2dp/a2dp_vendor_aptx_adaptive.cc
+@@ -880,6 +880,7 @@ static bool select_audio_channel_mode(
+         return true;
+       }
+       break;
++    case BTAV_A2DP_CODEC_CHANNEL_MODE_DUAL_CHANNEL:
+     case BTAV_A2DP_CODEC_CHANNEL_MODE_NONE:
+       break;
+   }
+@@ -1126,6 +1127,7 @@ bool A2dpCodecConfigAptxAdaptive::setCodecConfig(const uint8_t* p_peer_codec_inf
+         break;
+       }
+       break;
++    case BTAV_A2DP_CODEC_CHANNEL_MODE_DUAL_CHANNEL:
+     case BTAV_A2DP_CODEC_CHANNEL_MODE_NONE:
+       codec_capability_.channel_mode = BTAV_A2DP_CODEC_CHANNEL_MODE_NONE;
+       codec_config_.channel_mode = BTAV_A2DP_CODEC_CHANNEL_MODE_NONE;
+diff --git a/stack/a2dp/a2dp_vendor_aptx_hd.cc b/stack/a2dp/a2dp_vendor_aptx_hd.cc
+index b26b56a..ef1bdf7 100644
+--- a/stack/a2dp/a2dp_vendor_aptx_hd.cc
++++ b/stack/a2dp/a2dp_vendor_aptx_hd.cc
+@@ -640,6 +640,7 @@ static bool select_audio_channel_mode(
+         return true;
+       }
+       break;
++    case BTAV_A2DP_CODEC_CHANNEL_MODE_DUAL_CHANNEL:
+     case BTAV_A2DP_CODEC_CHANNEL_MODE_NONE:
+       break;
+   }
+@@ -840,6 +841,7 @@ bool A2dpCodecConfigAptxHd::setCodecConfig(const uint8_t* p_peer_codec_info,
+         codec_config_.channel_mode = codec_user_config_.channel_mode;
+       }
+       break;
++    case BTAV_A2DP_CODEC_CHANNEL_MODE_DUAL_CHANNEL:
+     case BTAV_A2DP_CODEC_CHANNEL_MODE_NONE:
+       codec_capability_.channel_mode = BTAV_A2DP_CODEC_CHANNEL_MODE_NONE;
+       codec_config_.channel_mode = BTAV_A2DP_CODEC_CHANNEL_MODE_NONE;
+diff --git a/stack/a2dp/a2dp_vendor_ldac.cc b/stack/a2dp/a2dp_vendor_ldac.cc
+index d131c29..60a5b69 100644
+--- a/stack/a2dp/a2dp_vendor_ldac.cc
++++ b/stack/a2dp/a2dp_vendor_ldac.cc
+@@ -844,6 +844,7 @@ static bool select_audio_channel_mode(
+         return true;
+       }
+       break;
++    case BTAV_A2DP_CODEC_CHANNEL_MODE_DUAL_CHANNEL:
+     case BTAV_A2DP_CODEC_CHANNEL_MODE_NONE:
+       break;
+   }
+@@ -1158,6 +1159,7 @@ bool A2dpCodecConfigLdac::setCodecConfig(const uint8_t* p_peer_codec_info,
+         break;
+       }
+       break;
++    case BTAV_A2DP_CODEC_CHANNEL_MODE_DUAL_CHANNEL:
+     case BTAV_A2DP_CODEC_CHANNEL_MODE_NONE:
+       codec_capability_.channel_mode = BTAV_A2DP_CODEC_CHANNEL_MODE_NONE;
+       codec_config_.channel_mode = BTAV_A2DP_CODEC_CHANNEL_MODE_NONE;
+-- 
+2.28.0
+

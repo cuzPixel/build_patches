@@ -1,0 +1,51 @@
+From cbe79166f45d9a9046da9ffd5c6fb26e3d226a9e Mon Sep 17 00:00:00 2001
+From: ValdikSS <iam@valdikss.org.ru>
+Date: Mon, 10 Sep 2018 02:02:50 +0300
+Subject: [PATCH 2/2] SBC Dual Channel (SBC HD Audio) support
+
+"HD Audio" checkbox is not checked for SBC by default.
+
+Change-Id: Id45c48aeaa2eb86f3dffa0cc825d1e09f1c00187
+---
+ src/com/android/bluetooth/a2dp/A2dpCodecConfig.java | 8 ++++++++
+ src/com/android/bluetooth/a2dp/A2dpService.java     | 5 ++++-
+ 2 files changed, 12 insertions(+), 1 deletion(-)
+
+diff --git a/src/com/android/bluetooth/a2dp/A2dpCodecConfig.java b/src/com/android/bluetooth/a2dp/A2dpCodecConfig.java
+index ba6481098..ccde4c7f9 100644
+--- a/src/com/android/bluetooth/a2dp/A2dpCodecConfig.java
++++ b/src/com/android/bluetooth/a2dp/A2dpCodecConfig.java
+@@ -112,6 +112,14 @@ class A2dpCodecConfig {
+             BluetoothCodecConfig codecConfig = codecConfigArray[i];
+             if (!codecConfig.isMandatoryCodec()) {
+                 codecConfigArray[i] = null;
++            } else {
++                // Rebuild SBC selectable codec with Dual Channel (SBC HD audio)
++                codecConfigArray[i] = new BluetoothCodecConfig(
++                    BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC, mA2dpSourceCodecPrioritySbc,
++                    BluetoothCodecConfig.SAMPLE_RATE_NONE,
++                    BluetoothCodecConfig.BITS_PER_SAMPLE_NONE,
++                    BluetoothCodecConfig.CHANNEL_MODE_DUAL_CHANNEL, 0 /* codecSpecific1 */,
++                    0 /* codecSpecific2 */, 0 /* codecSpecific3 */, 0 /* codecSpecific4 */);
+             }
+         }
+ 
+diff --git a/src/com/android/bluetooth/a2dp/A2dpService.java b/src/com/android/bluetooth/a2dp/A2dpService.java
+index 2d3eb3991..976ef8cae 100644
+--- a/src/com/android/bluetooth/a2dp/A2dpService.java
++++ b/src/com/android/bluetooth/a2dp/A2dpService.java
+@@ -1774,7 +1774,10 @@ public class A2dpService extends ProfileService {
+             BluetoothCodecStatus codecStatus = sm.getCodecStatus();
+             if (codecStatus != null) {
+                 for (BluetoothCodecConfig config : codecStatus.getCodecsSelectableCapabilities()) {
+-                    if (config.isMandatoryCodec()) {
++                    final boolean isMandatoryCodecWithDualChannel = config.isMandatoryCodec()
++                            && (config.getChannelMode() & config.CHANNEL_MODE_DUAL_CHANNEL)
++                                    == config.CHANNEL_MODE_DUAL_CHANNEL;
++                    if (config.isMandatoryCodec() || !isMandatoryCodecWithDualChannel) {
+                         hasMandatoryCodec = true;
+                     } else {
+                         supportsOptional = true;
+-- 
+2.28.0
+
